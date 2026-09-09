@@ -1,0 +1,328 @@
+package com.example.test2.ui.simulator
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.test2.core.LoanTier
+import com.example.test2.ui.apply.CardBorder
+import com.example.test2.ui.apply.Green
+import com.example.test2.ui.apply.Highlight
+import com.example.test2.ui.apply.SectionCard
+import com.example.test2.ui.apply.SummaryRow
+import com.example.test2.ui.apply.TextMuted
+import com.example.test2.ui.apply.TextPrimary
+import com.example.test2.ui.apply.TextSecondary
+import com.example.test2.ui.apply.TrackTodo
+import com.example.test2.ui.apply.formatRupiah
+import kotlin.math.roundToInt
+
+private val Amber = Color(0xFFB25E02)
+
+
+private val AmberBg = Color(0xFFFFF6E5)
+
+/**
+ * The simulator body, shared by the Home card and the Simulate tab.
+ *
+ * Everything numeric comes off [viewModel], including the slider bounds: the
+ * amount range is the union of the tiers on offer and the tenor range belongs
+ * to whichever tier the current amount falls in, so the two sliders cannot
+ * between them describe a loan that does not exist.
+ */
+@Composable
+fun SimulatorPanel(
+    viewModel: SimulatorViewModel,
+    modifier: Modifier = Modifier,
+    showTierRail: Boolean = true,
+) {
+    val tier = viewModel.tier
+
+    Column(modifier = modifier.fillMaxWidth()) {
+
+        AmountField(viewModel)
+
+        Spacer(Modifier.height(16.dp))
+
+        if (tier != null) {
+            TierBadge(tier, showRail = showTierRail)
+            Spacer(Modifier.height(16.dp))
+        }
+
+        TenorField(viewModel, tier)
+
+        Spacer(Modifier.height(18.dp))
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(12.dp))
+                .background(Highlight)
+                .padding(16.dp),
+        ) {
+            Text("Estimated Monthly Instalment", fontSize = 13.sp, color = TextSecondary)
+            Spacer(Modifier.height(6.dp))
+            Row(verticalAlignment = Alignment.Bottom) {
+                Text(
+                    text = formatRupiah(viewModel.monthlyInstalment),
+                    fontSize = 26.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Green,
+                )
+                Spacer(Modifier.width(6.dp))
+                Text(
+                    text = "/mo",
+                    fontSize = 14.sp,
+                    color = TextSecondary,
+                    modifier = Modifier.padding(bottom = 4.dp),
+                )
+            }
+        }
+
+        Spacer(Modifier.height(8.dp))
+
+        SummaryRow(
+            label = "Interest rate",
+            value = "${tier?.rateLabel ?: "-"} p.a.",
+            leadingDot = true,
+        )
+        SummaryRow(label = "Admin fee (one-off)", value = formatRupiah(viewModel.adminFee))
+        SummaryRow(label = "Total repayment", value = formatRupiah(viewModel.totalRepayment))
+        SummaryRow(
+            label = "Total cost of credit",
+            value = formatRupiah(viewModel.totalCost),
+            bold = true,
+        )
+
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = "An estimate only. Your final rate, tenure and fee follow the " +
+                "plafond level approved for you.",
+            fontSize = 12.sp,
+            color = TextMuted,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(),
+        )
+
+        // The bundled rate card is a fallback, not a secret. Saying so is the
+        // difference between an old quote and a wrong one.
+        if (!viewModel.live) {
+            Spacer(Modifier.height(10.dp))
+            Text(
+                text = "Showing the last published rates - we could not reach the " +
+                    "server to refresh them.",
+                fontSize = 12.sp,
+                color = Amber,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(AmberBg)
+                    .padding(10.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun AmountField(viewModel: SimulatorViewModel) {
+
+    val millions = (viewModel.amount / 1_000_000L).toInt()
+    val minMillions = (viewModel.minAmount / 1_000_000L).coerceAtLeast(1L).toInt()
+    val maxMillions = (viewModel.maxAmount / 1_000_000L).toInt()
+
+    ValueHeader("Loan Amount", formatRupiah(viewModel.amount))
+    Slider(
+        value = millions.toFloat(),
+        onValueChange = { viewModel.updateAmount(it.roundToInt() * 1_000_000L) },
+        valueRange = minMillions.toFloat()..maxMillions.toFloat(),
+        colors = simulatorSliderColors(),
+    )
+    RangeLabels(formatRupiah(viewModel.minAmount), formatRupiah(viewModel.maxAmount))
+}
+
+@Composable
+private fun TenorField(viewModel: SimulatorViewModel, tier: LoanTier?) {
+
+    val minTenor = tier?.minTenor ?: 1
+    val maxTenor = tier?.maxTenor ?: 12
+
+    ValueHeader("Tenure", "${viewModel.tenor} months")
+    Slider(
+        value = viewModel.tenor.toFloat(),
+        onValueChange = { viewModel.updateTenor(it.roundToInt()) },
+        valueRange = minTenor.toFloat()..maxTenor.toFloat(),
+        // No steps: the range changes with the tier, and a fixed step count
+        // would quantise the wrong way on every tier but one.
+        colors = simulatorSliderColors(),
+    )
+    RangeLabels("$minTenor months", "$maxTenor months")
+}
+
+/**
+ * Which tier the current amount sits in, and - on the tab - where it sits
+ * among the others. The rail is what makes "the rate improves as you borrow
+ * more" visible rather than something to be discovered by dragging.
+ */
+@Composable
+private fun TierBadge(tier: LoanTier, showRail: Boolean) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(Green.copy(alpha = 0.08f))
+            .padding(14.dp),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = tier.name,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = Green,
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(
+                text = "Level ${tier.level}",
+                fontSize = 12.sp,
+                color = TextSecondary,
+            )
+            Spacer(Modifier.weight(1f))
+            Text(
+                text = "${tier.rateLabel} p.a.",
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextPrimary,
+            )
+        }
+
+        if (showRail) {
+            Spacer(Modifier.height(6.dp))
+            Text(
+                text = "${formatRupiah(tier.minAmount)} - ${formatRupiah(tier.maxAmount)} · " +
+                    "${tier.minTenor}-${tier.maxTenor} months · " +
+                    "admin ${formatRupiah(tier.adminFee)}",
+                fontSize = 12.sp,
+                color = TextSecondary,
+            )
+        }
+    }
+}
+
+/** All tiers at once, so the whole ladder is legible without dragging a slider. */
+@Composable
+fun TierTable(tiers: List<LoanTier>, currentLevel: Int?, modifier: Modifier = Modifier) {
+    SectionCard(modifier = modifier) {
+        Text(
+            text = "Plafond Levels",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            color = TextPrimary,
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = "The bigger the loan, the lower the rate. Your level is set by " +
+                "the limit approved for you.",
+            fontSize = 13.sp,
+            color = TextSecondary,
+        )
+        Spacer(Modifier.height(12.dp))
+
+        tiers.forEachIndexed { index, tier ->
+            if (index > 0) {
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(CardBorder.copy(alpha = 0.6f)),
+                )
+            }
+            TierRow(tier, highlighted = tier.level == currentLevel)
+        }
+    }
+}
+
+@Composable
+private fun TierRow(tier: LoanTier, highlighted: Boolean) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(10.dp))
+            .background(if (highlighted) Green.copy(alpha = 0.08f) else Color.Transparent)
+            .padding(vertical = 10.dp, horizontal = if (highlighted) 10.dp else 0.dp),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = "${tier.level}. ${tier.name}",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = if (highlighted) Green else TextPrimary,
+                modifier = Modifier.weight(1f),
+            )
+            Text(
+                text = "${tier.rateLabel} p.a.",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextPrimary,
+            )
+        }
+        Spacer(Modifier.height(2.dp))
+        Text(
+            text = "${formatRupiah(tier.minAmount)} - ${formatRupiah(tier.maxAmount)}",
+            fontSize = 12.sp,
+            color = TextSecondary,
+        )
+        Text(
+            text = "${tier.minTenor}-${tier.maxTenor} months · admin ${formatRupiah(tier.adminFee)}",
+            fontSize = 12.sp,
+            color = TextMuted,
+        )
+    }
+}
+
+@Composable
+private fun ValueHeader(label: String, value: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(label, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = TextPrimary)
+        Spacer(Modifier.weight(1f))
+        Text(value, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Green)
+    }
+}
+
+@Composable
+private fun RangeLabels(start: String, end: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(start, fontSize = 12.sp, color = TextSecondary)
+        Text(end, fontSize = 12.sp, color = TextSecondary, textAlign = TextAlign.End)
+    }
+}
+
+@Composable
+private fun simulatorSliderColors() = SliderDefaults.colors(
+    thumbColor = Green,
+    activeTrackColor = Green,
+    inactiveTrackColor = TrackTodo,
+)

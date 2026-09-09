@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The background is the flat brand green sampled from logo-mark.png itself,
+    and the foreground is that same artwork at 86% of the 108dp canvas. Matching
+    the two means the rounded corners already baked into the PNG blend into the
+    layer behind them instead of showing as a tile inside a tile, while the bar
+    chart stays clear of the launcher's mask.
+
+    No <monochrome>: the themed-icon layer wants a flat silhouette, and pointing
+    it at full-colour artwork just gets it tinted into a blob. Without one,
+    Android falls back to this icon, which is the better of the two outcomes.
+-->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/ic_launcher_background" />
+    <foreground android:drawable="@mipmap/ic_launcher_foreground" />
+</adaptive-icon>
