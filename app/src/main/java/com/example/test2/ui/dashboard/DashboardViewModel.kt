@@ -10,6 +10,8 @@ import com.example.test2.data.local.SessionStore
 import com.example.test2.data.dto.CustomerPlafondDto
 import com.example.test2.data.dto.LoanApplicationDto
 import com.example.test2.data.repository.LoanRepository
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 class DashboardViewModel(
@@ -18,6 +20,9 @@ class DashboardViewModel(
 ) : ViewModel() {
 
     var isLoading by mutableStateOf(false)
+        private set
+
+    var isRefreshing by mutableStateOf(false)
         private set
 
     var error by mutableStateOf<String?>(null)
@@ -34,34 +39,42 @@ class DashboardViewModel(
 
     val latestApplication: LoanApplicationDto? get() = applications.firstOrNull()
 
-    fun refresh() {
+    fun refresh(userInitiated: Boolean = false) {
         if (isLoading) return
 
         isLoading = true
+        if (userInitiated) isRefreshing = true
         error = null
 
         viewModelScope.launch {
-            val session = sessionStore.sessionOnce()
+            try {
+                val session = sessionStore.sessionOnce()
 
-            if (session == null) {
-                error = "Session not found. Please sign in again."
+                if (session == null) {
+                    error = "Session not found. Please sign in again."
+                    return@launch
+                }
+
+                customerName = session.fullName.ifBlank { session.email }
+
+                coroutineScope {
+                    val plafondCall = async { repository.myPlafond() }
+                    val applicationsCall = async { repository.myApplications(session.customerId) }
+
+                    when (val result = plafondCall.await()) {
+                        is Outcome.Success -> plafond = result.value
+                        is Outcome.Failure -> error = result.message
+                    }
+
+                    when (val result = applicationsCall.await()) {
+                        is Outcome.Success -> applications = result.value
+                        is Outcome.Failure -> if (error == null) error = result.message
+                    }
+                }
+            } finally {
                 isLoading = false
-                return@launch
+                isRefreshing = false
             }
-
-            customerName = session.fullName.ifBlank { session.email }
-
-            when (val result = repository.myPlafond()) {
-                is Outcome.Success -> plafond = result.value
-                is Outcome.Failure -> error = result.message
-            }
-
-            when (val result = repository.myApplications(session.customerId)) {
-                is Outcome.Success -> applications = result.value
-                is Outcome.Failure -> if (error == null) error = result.message
-            }
-
-            isLoading = false
         }
     }
 }

@@ -13,13 +13,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/**
- * The step-2 gate, exercised through a real composition.
- *
- * Instrumented rather than a JVM test because it is the *screen* under test -
- * whether the button refuses to advance and whether the "Other" box appears -
- * not the state class, which `ApplyLoanStateTest` covers on its own.
- */
 @RunWith(AndroidJUnit4::class)
 class LoanDetailsStepTest {
 
@@ -124,7 +117,6 @@ class LoanDetailsStepTest {
         compose.onNodeWithText("Tell us what the loan is for.").performScrollTo().assertIsDisplayed()
     }
 
-    /** Item 5: the simulation must sit above the payout account, not below it. */
     @Test
     fun theInstalmentSimulationIsShownWithTheLoanTerms() {
         compose.setContent {

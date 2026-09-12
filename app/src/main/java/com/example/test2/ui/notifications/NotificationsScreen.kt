@@ -32,6 +32,7 @@ import com.example.test2.ui.apply.CardShape
 import com.example.test2.ui.apply.Green
 import com.example.test2.ui.apply.Highlight
 import com.example.test2.ui.apply.OutlineButton
+import com.example.test2.ui.common.RefreshableScreen
 import com.example.test2.ui.apply.ScreenBg
 import com.example.test2.ui.apply.TextMuted
 import com.example.test2.ui.apply.TextPrimary
@@ -47,8 +48,13 @@ fun NotificationsScreen(
 ) {
     LaunchedEffect(Unit) { viewModel.refresh() }
 
+  RefreshableScreen(
+      isRefreshing = viewModel.isRefreshing,
+      onRefresh = { viewModel.refresh(userInitiated = true) },
+      modifier = modifier,
+  ) {
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .background(ScreenBg)
             .verticalScroll(rememberScrollState())
@@ -113,6 +119,7 @@ fun NotificationsScreen(
         OutlineButton(text = "Back", onClick = onBack, modifier = Modifier.fillMaxWidth())
         Spacer(Modifier.height(28.dp))
     }
+  }
 }
 
 @Composable

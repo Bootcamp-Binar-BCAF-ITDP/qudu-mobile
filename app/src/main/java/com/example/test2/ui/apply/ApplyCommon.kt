@@ -55,8 +55,6 @@ import com.example.test2.R
 import kotlin.math.pow
 import kotlin.math.roundToLong
 
-/* ---------- Palette ---------- */
-
 internal val Green = Color(0xFF0B6B2E)
 internal val GreenBright = Color(0xFF1E9E4A)
 internal val ScreenBg = Color(0xFFF6F8FA)
@@ -76,14 +74,12 @@ internal val Highlight = Color(0xFFEEF3F8)
 internal val CardShape = RoundedCornerShape(16.dp)
 internal val FieldShape = RoundedCornerShape(10.dp)
 
-/* ---------- Camera capture ---------- */
 internal fun createCaptureImageUri(context: Context): Uri {
     val imagesDir = java.io.File(context.cacheDir, "images").apply { mkdirs() }
     val file = java.io.File(imagesDir, "selfie_${System.currentTimeMillis()}.jpg")
     return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
 }
 
-/* ---------- Money + math helpers ---------- */
 
 internal fun formatRupiah(amount: Long, withPrefix: Boolean = true): String {
     val digits = amount.toString()
@@ -103,7 +99,6 @@ internal fun monthlyInstallment(principal: Long, months: Int, apr: Double): Long
     return (raw / 1000.0).roundToLong() * 1000
 }
 
-/* ---------- Chrome ---------- */
 @Composable
 internal fun ApplyTopBar(stepLabel: String? = null) {
     Column {
@@ -155,11 +150,6 @@ internal fun ApplyTopBar(stepLabel: String? = null) {
     }
 }
 
-/**
- * @param onStepClick when given, the dots become a way back (and forward, if
- *        the flow allows it) rather than decoration. The flow decides which
- *        jumps are legal - this only reports the tap.
- */
 @Composable
 internal fun StepIndicator(currentStep: Int, onStepClick: ((Int) -> Unit)? = null) {
     val labels = listOf("Documents", "Details", "Review")
@@ -255,7 +245,6 @@ private fun StepDot(
     }
 }
 
-/* ---------- Building blocks ---------- */
 @Composable
 internal fun SectionCard(
     modifier: Modifier = Modifier,
@@ -282,15 +271,12 @@ internal fun FieldLabel(text: String, required: Boolean = false) {
             fontWeight = FontWeight.SemiBold,
             color = TextPrimary,
         )
-        // Marked before anything is submitted, not after it fails - the point is
-        // to tell the customer what is mandatory while they are still filling it.
         if (required) {
             Text(text = " *", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Danger)
         }
     }
 }
 
-/** The one-line reason a field is refused. Renders nothing when [message] is null. */
 @Composable
 internal fun FieldError(message: String?) {
     if (message == null) return

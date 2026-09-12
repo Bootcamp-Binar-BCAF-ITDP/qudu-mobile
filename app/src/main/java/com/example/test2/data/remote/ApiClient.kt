@@ -1,5 +1,6 @@
 package com.example.test2.data.remote
 
+import android.content.Context
 import com.example.test2.BuildConfig
 import com.example.test2.data.local.SessionStore
 import kotlinx.coroutines.runBlocking
@@ -12,7 +13,7 @@ import java.util.concurrent.TimeUnit
 
 object ApiClient {
 
-    fun create(sessionStore: SessionStore): ApiService {
+    fun create(sessionStore: SessionStore, context: Context): ApiService {
 
         val authInterceptor = Interceptor { chain ->
             val token = runBlocking { sessionStore.tokenOnce() }
@@ -34,12 +35,15 @@ object ApiClient {
             }
         }
 
-        val client = OkHttpClient.Builder()
+        val builder = OkHttpClient.Builder()
             .addInterceptor(authInterceptor)
             .addInterceptor(logging)
-            .connectTimeout(30, TimeUnit.SECONDS)
+            .connectTimeout(15, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
-            .build()
+
+        networkInspectors(context).forEach(builder::addInterceptor)
+
+        val client = builder.build()
 
         return Retrofit.Builder()
             .baseUrl(BuildConfig.BASE_URL)

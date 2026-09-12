@@ -21,10 +21,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // 10.0.2.2 is the host machine as seen from the Android emulator, so this
-        // reaches a QuDu-be running on localhost:8080. On a physical device put
-        // your machine's LAN address here instead.
-        buildConfigField("String", "BASE_URL", "\"http://10.10.100.219:8080/\"")
+        buildConfigField("String", "BASE_URL", "\"http://192.168.0.112:8080/\"")
     }
 
     buildTypes {
@@ -54,19 +51,18 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-    // For LocalLifecycleOwner: the app refreshes on ON_RESUME, because a push
-    // that arrives while the app is backgrounded never reaches onMessageReceived.
     implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.navigation.compose)
     implementation("androidx.compose.material:material-icons-extended")
 
-    // Backend access
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.gson)
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging.interceptor)
     implementation(libs.androidx.datastore.preferences)
 
-    // Push notifications
+    debugImplementation(libs.chucker)
+
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging)
 

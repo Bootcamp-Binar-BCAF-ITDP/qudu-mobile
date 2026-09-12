@@ -2,6 +2,8 @@ package com.example.test2.data.repository
 
 import com.example.test2.core.Outcome
 import com.example.test2.data.local.Session
+import com.example.test2.data.local.LoanCache
+import com.example.test2.data.local.ProfileCache
 import com.example.test2.data.local.SessionStore
 import com.example.test2.data.remote.ApiService
 import com.example.test2.data.dto.DeviceTokenRequestDto
@@ -15,6 +17,8 @@ import com.example.test2.messaging.currentFcmToken
 class AuthRepository(
     private val api: ApiService,
     private val sessionStore: SessionStore,
+    private val loanCache: LoanCache,
+    private val profileCache: ProfileCache,
 ) {
 
     val session = sessionStore.session
@@ -25,13 +29,6 @@ class AuthRepository(
             is Outcome.Failure -> result
         }
 
-    /**
-     * Step 1 of signup: ask the backend to email a verification code.
-     *
-     * A failure carrying [com.example.test2.core.HTTP_ALREADY_REGISTERED] means
-     * the address already has an account - the one failure the register screen
-     * answers with a route to login rather than a red message.
-     */
     suspend fun requestRegistrationOtp(email: String): Outcome<Unit> =
         when (val result = apiCall {
             api.requestRegistrationOtp(RegistrationOtpRequestDto(email.trim()))
@@ -104,6 +101,9 @@ class AuthRepository(
         } catch (e: Exception) {
         }
         sessionStore.clear()
+
+        loanCache.clear()
+        profileCache.clear()
     }
 
     suspend fun syncDeviceToken(): Outcome<Unit> =

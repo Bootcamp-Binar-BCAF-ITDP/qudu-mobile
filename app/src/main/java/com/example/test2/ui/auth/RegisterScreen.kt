@@ -15,8 +15,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.test2.di.rememberViewModelFactory
 import com.example.test2.ui.apply.*
 import com.example.test2.ui.common.AppDateField
 
@@ -25,23 +23,14 @@ enum class Citizenship(val code: String, val label: String) {
     WNA("WNA", "WNA - Foreign national"),
 }
 
-/**
- * Signup in two steps: fill the form, then type the code emailed to the address.
- *
- * The form is not sent anywhere on the first tap - only the email is, so the
- * backend can say whether it is already taken. An address that already has an
- * account never reaches the code step: [onEmailAlreadyRegistered] takes the
- * visitor to login, where the shared AuthViewModel's `info` message is waiting
- * to explain why they were moved.
- */
 @Composable
 fun RegisterScreen(
+    viewModel: AuthViewModel,
     onRegistered: () -> Unit,
     onBackToLogin: () -> Unit,
     onEmailAlreadyRegistered: () -> Unit = onBackToLogin,
     modifier: Modifier = Modifier,
 ) {
-    val viewModel: AuthViewModel = viewModel(factory = rememberViewModelFactory())
 
     var form by remember { mutableStateOf(RegisterForm()) }
     var otpSent by remember { mutableStateOf(false) }
@@ -240,10 +229,6 @@ private fun RowScope.SexOption(
     }
 }
 
-/**
- * The second signup step. Kept in this file rather than its own screen because
- * it only ever exists as the tail of [RegisterScreen] and shares its form state.
- */
 @Composable
 private fun RegistrationOtpStep(
     email: String,

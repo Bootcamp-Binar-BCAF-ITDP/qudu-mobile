@@ -44,18 +44,12 @@ import com.example.test2.core.ceilingAmount
 import com.example.test2.core.floorAmount
 import kotlin.math.roundToInt
 
-// Amount and tenor bounds are no longer constants here: they come from the
-// plafond tier the requested amount falls into, so the form cannot describe a
-// loan the bank does not sell. See ApplyLoanState.tier.
-
 private val Purposes = listOf(
     "Business Expansion",
     "Education",
     "Home Renovation",
     "Medical Expenses",
     "Debt Consolidation",
-    // The one entry that opens the free-text box - kept as the shared constant
-    // so the dropdown and the validation cannot drift apart.
     ApplyLoanState.PURPOSE_OTHER,
 )
 
@@ -67,8 +61,6 @@ fun LoanDetailsStep(
     onContinue: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Errors appear only once the customer has tried to move on. Marking a form
-    // red before it has been filled in is nagging, not helping.
     var showErrors by remember { mutableStateOf(false) }
     val errors = state.detailErrors()
 
@@ -93,8 +85,6 @@ fun LoanDetailsStep(
             Spacer(Modifier.height(20.dp))
             TenureField(state, error = errors.tenor.takeIf { showErrors })
 
-            // Purpose sits below tenure: amount and tenure are the two numbers
-            // the simulation below depends on, so they are answered first.
             Spacer(Modifier.height(20.dp))
             FieldLabel("Loan Purpose", required = true)
             AppDropdownField(
@@ -135,10 +125,6 @@ fun LoanDetailsStep(
             FieldError(errors.income.takeIf { showErrors })
         }
 
-        // The simulation sits between the loan terms and the payout account, so
-        // the customer sees what the instalment costs while the numbers that
-        // produced it are still on screen - not after scrolling past the bank
-        // details they have no reason to read first.
         Spacer(Modifier.height(20.dp))
         SimulationSummary(state)
 
@@ -207,9 +193,6 @@ fun LoanDetailsStep(
         Spacer(Modifier.height(28.dp))
         PrimaryButton(
             text = "Continue to Review",
-            // Enabled even when incomplete, on purpose: a disabled button that
-            // will not say why is the version of this that gets reported as a
-            // bug. Pressing it names what is missing instead.
             onClick = {
                 if (errors.hasAny) showErrors = true else onContinue()
             },
@@ -234,14 +217,6 @@ fun LoanDetailsStep(
     }
 }
 
-/**
- * Amount as a slider *and* a typed field, kept on one value.
- *
- * The slider is for exploring, the field for the figure someone already has in
- * mind - 27,500,000 is unreachable by dragging a track that spans hundreds of
- * millions. Both go through [ApplyLoanState.updateLoanAmount], which is what
- * enforces the customer's credit limit on either route.
- */
 @Composable
 private fun AmountField(state: ApplyLoanState, error: String?) {
 
@@ -262,13 +237,8 @@ private fun AmountField(state: ApplyLoanState, error: String?) {
     )
     FieldError(error)
 
-    // A slider needs room to move. When the customer's limit sits at or below
-    // the smallest loan the range collapses to a point, and Material3 divides by
-    // that width - so the field is left to stand on its own instead.
     if (maxAmount > minAmount) {
         Slider(
-            // Coerced only for the track position: the typed value is left alone
-            // so a half-entered number is not rewritten under their fingers.
             value = (state.loanAmount.coerceIn(minAmount, maxAmount) / 1_000_000L).toFloat(),
             onValueChange = { state.updateLoanAmount(it.roundToInt() * 1_000_000L) },
             valueRange = (minAmount / 1_000_000L).toFloat()..(maxAmount / 1_000_000L).toFloat(),
@@ -317,8 +287,6 @@ private fun TenureField(state: ApplyLoanState, error: String?) {
     )
     FieldError(error)
 
-    // Same guard as the amount: a tier offering exactly one tenure would give
-    // the slider a zero-width range.
     if (maxTerm > minTerm) {
         Slider(
             value = state.termMonths.coerceIn(minTerm, maxTerm).toFloat(),
@@ -356,7 +324,6 @@ private fun SimulationSummary(state: ApplyLoanState) {
             .background(CardBg)
             .border(1.dp, CardBorder, CardShape)
     ) {
-        // Soft green blob in the top-right corner, as in the mockup.
         Box(
             modifier = Modifier
                 .align(Alignment.TopEnd)

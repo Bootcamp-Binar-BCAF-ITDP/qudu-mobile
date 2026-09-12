@@ -3,14 +3,6 @@ package com.example.test2.core
 import java.math.BigDecimal
 import java.math.RoundingMode
 
-/**
- * One plafond tier, flattened for the simulator.
- *
- * Mirrors com.delvin.loan.dto.response.plafond.PlafondResponse, but with the
- * money as Long rupiah and the rate as a Double: the simulator does arithmetic
- * on every slider move, and BigDecimal there buys precision nobody can see on
- * an estimate that is rounded to the nearest thousand anyway.
- */
 data class LoanTier(
     val level: Int,
     val name: String,
@@ -25,7 +17,6 @@ data class LoanTier(
 
     fun clampTenor(months: Int): Int = months.coerceIn(minTenor, maxTenor)
 
-    /** "15%", "9.5%" - trailing ".0" trimmed, because "9.50%" reads like precision. */
     val rateLabel: String
         get() {
             val percent = annualRate * 100
@@ -36,15 +27,6 @@ data class LoanTier(
 
 object PlafondTiers {
 
-    /**
-     * The published rate card as of 2026-09-08, used only when
-     * GET /api/plafonds/catalog cannot be reached.
-     *
-     * It exists so the simulator still works offline and before sign-in, not as
-     * a second source of truth: the screen says plainly when it is quoting from
-     * here, because staff can and do revise these (level 6 is already a
-     * revision) and a silently stale rate is worse than an honest one.
-     */
     val FALLBACK = listOf(
         LoanTier(1, "Bronze", 1_000_000, 10_000_000, 1, 12, 0.15, 100_000),
         LoanTier(2, "Silver", 10_000_001, 50_000_000, 1, 24, 0.13, 200_000),
@@ -55,14 +37,6 @@ object PlafondTiers {
     )
 }
 
-/**
- * The tier that covers [amount], or the nearest one when it falls in a gap.
- *
- * Gaps are real: tier 1 ends at 10,000,000 and tier 2 starts at 10,000,001, so
- * a slider stepping in millions never lands between them - but a hand-typed
- * amount can, and quoting nothing at all there would be worse than quoting the
- * tier the customer is standing next to.
- */
 fun List<LoanTier>.tierFor(amount: Long): LoanTier? {
     if (isEmpty()) return null
     return firstOrNull { it.covers(amount) }
@@ -74,18 +48,10 @@ fun List<LoanTier>.tierFor(amount: Long): LoanTier? {
         }
 }
 
-/** Lowest amount any tier will lend, for the slider's floor. */
 fun List<LoanTier>.floorAmount(): Long = minOfOrNull { it.minAmount } ?: 1_000_000L
 
-/** Highest amount any tier will lend, for the slider's ceiling. */
 fun List<LoanTier>.ceilingAmount(): Long = maxOfOrNull { it.maxAmount } ?: 1_200_000_000L
 
-/**
- * Annuity instalment, rounded up to the nearest thousand.
- *
- * Rounded up rather than to nearest on purpose: an estimate that lands below
- * the real instalment is the one that misleads.
- */
 fun monthlyInstalmentFor(principal: Long, months: Int, annualRate: Double): Long {
     if (months <= 0 || principal <= 0) return 0
     val monthlyRate = annualRate / 12.0

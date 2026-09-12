@@ -12,5 +12,4 @@ sealed interface Outcome<out T> {
 const val HTTP_OVER_PLAFOND = 422
 const val HTTP_UNAUTHORIZED = 401
 
-/** The address already has an account - see AuthRepository.requestRegistrationOtp. */
 const val HTTP_ALREADY_REGISTERED = 409

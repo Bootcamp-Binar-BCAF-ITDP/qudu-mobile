@@ -42,7 +42,6 @@ import com.example.test2.ui.apply.TextPrimary
 import com.example.test2.ui.apply.TextSecondary
 import androidx.compose.ui.graphics.Color
 
-/** Stale documents read amber: on file, but not good enough to submit with. */
 private val Amber = Color(0xFFB25E02)
 
 @Composable
@@ -53,16 +52,8 @@ fun DocumentRow(
     isUploading: Boolean,
     onCapture: (String) -> Unit,
     modifier: Modifier = Modifier,
-    /**
-     * On file but past its freshness window, so it counts as not uploaded. Only
-     * financial evidence ever expires - see the backend's
-     * DocumentType.SUBMISSION_FRESHNESS_DAYS.
-     */
     isStale: Boolean = false,
 ) {
-    // A stale document is deliberately not shown as done: it reads as amber and
-    // asks to be replaced, because leaving it green would tell the customer they
-    // are ready to submit when the server will refuse them.
     val uploaded = fileName != null && !isStale
 
     Row(

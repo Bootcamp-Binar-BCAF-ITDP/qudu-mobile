@@ -27,18 +27,12 @@ import retrofit2.http.*
 
 interface ApiService {
 
-    // ---------- auth ----------
     @POST("api/auth/register")
     suspend fun register(@Body body: RegisterRequestDto): Response<ApiEnvelope<Unit>>
 
     @POST("api/auth/login")
     suspend fun login(@Body body: LoginRequestDto): Response<AuthResponseDto>
 
-    /**
-     * Step 1 of signup. Answers 409 when the address already has an account -
-     * the signal the register screen turns into "email sudah terdaftar" plus a
-     * trip to the login screen.
-     */
     @POST("api/auth/register/otp")
     suspend fun requestRegistrationOtp(
         @Body body: RegistrationOtpRequestDto,
@@ -50,7 +44,6 @@ interface ApiService {
     @POST("api/auth/reset-password")
     suspend fun resetPassword(@Body body: ResetPasswordRequestDto): Response<ApiEnvelope<Unit>>
 
-    // ---------- applications ----------
     @POST("api/customer")
     suspend fun createApplication(
         @Body body: LoanApplicationCreateRequestDto,
@@ -71,7 +64,6 @@ interface ApiService {
         @Part file: MultipartBody.Part,
     ): Response<ApiEnvelope<LoanDocumentDto>>
 
-    // ---------- profile ----------
     @GET("api/customer/profile")
     suspend fun myProfile(): Response<ApiEnvelope<CustomerProfileDto>>
 
@@ -90,7 +82,6 @@ interface ApiService {
         @Part file: MultipartBody.Part,
     ): Response<ApiEnvelope<CustomerDocumentDto>>
 
-    // ---------- notifications ----------
     @GET("api/customer/notifications")
     suspend fun myNotifications(
         @Query("page") page: Int = 0,
@@ -108,7 +99,6 @@ interface ApiService {
     @PUT("api/customer/notifications/read")
     suspend fun markAllNotificationsRead(): Response<ApiEnvelope<Map<String, Int>>>
 
-    // ---------- plafond ----------
     @GET("api/customer/plafond")
     suspend fun myPlafond(): Response<ApiEnvelope<CustomerPlafondDto>>
 
@@ -120,17 +110,9 @@ interface ApiService {
     @GET("api/customer/plafond/requests")
     suspend fun myPlafondRequests(): Response<ApiEnvelope<List<PlafondRequestDto>>>
 
-    /**
-     * The product rate card behind the loan simulator.
-     *
-     * The only endpoint here that carries no token requirement - the simulator
-     * runs before anyone signs in. It is permitted by name in the backend's
-     * SecurityRoutes.PUBLIC; the rest of /api/plafonds stays admin-only.
-     */
     @GET("api/plafonds/catalog")
     suspend fun plafondCatalog(): Response<ApiEnvelope<List<PlafondDto>>>
 
-    // ---------- push ----------
     @POST("api/customer/device-tokens")
     suspend fun registerDeviceToken(@Body body: DeviceTokenRequestDto): Response<ApiEnvelope<Unit>>
 

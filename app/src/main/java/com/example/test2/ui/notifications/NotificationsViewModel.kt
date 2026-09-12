@@ -22,24 +22,32 @@ class NotificationsViewModel(
     var isLoading by mutableStateOf(false)
         private set
 
+    var isRefreshing by mutableStateOf(false)
+        private set
+
     var error by mutableStateOf<String?>(null)
         private set
 
-    fun refresh() {
+    fun refresh(userInitiated: Boolean = false) {
         if (isLoading) return
 
         isLoading = true
+        if (userInitiated) isRefreshing = true
 
         viewModelScope.launch {
-            when (val result = repository.list()) {
-                is Outcome.Success -> {
-                    notifications = result.value
-                    unread = result.value.count { !it.read }.toLong()
-                    error = null
+            try {
+                when (val result = repository.list()) {
+                    is Outcome.Success -> {
+                        notifications = result.value
+                        unread = result.value.count { !it.read }.toLong()
+                        error = null
+                    }
+                    is Outcome.Failure -> error = result.message
                 }
-                is Outcome.Failure -> error = result.message
+            } finally {
+                isLoading = false
+                isRefreshing = false
             }
-            isLoading = false
         }
     }
 

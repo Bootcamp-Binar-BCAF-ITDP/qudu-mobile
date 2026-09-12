@@ -9,13 +9,20 @@ import com.example.test2.data.dto.LoanApplicationDto
 import com.example.test2.data.dto.LoanDocumentDto
 import com.example.test2.data.dto.PlafondRequestDto
 import com.example.test2.data.dto.PlafondUpgradeRequestDto
+import com.example.test2.data.local.CachedList
+import com.example.test2.data.local.LoanCache
 import com.example.test2.data.remote.ApiService
+import kotlinx.coroutines.flow.Flow
 import java.math.BigDecimal
 
 class LoanRepository(
     private val api: ApiService,
     private val contentResolver: ContentResolver,
+    private val cache: LoanCache,
 ) {
+
+    val cachedApplications: Flow<CachedList<LoanApplicationDto>> = cache.applications
+    val cachedUpgradeRequests: Flow<CachedList<PlafondRequestDto>> = cache.upgradeRequests
 
     suspend fun createApplication(
         body: LoanApplicationCreateRequestDto,
@@ -24,8 +31,11 @@ class LoanRepository(
     suspend fun myApplications(customerId: String): Outcome<List<LoanApplicationDto>> =
         when (val result = apiCall { api.listApplications(customerId) }) {
             is Outcome.Failure -> result
-            is Outcome.Success ->
-                Outcome.Success(result.value.data?.content.orEmpty())
+            is Outcome.Success -> {
+                val items = result.value.data?.content.orEmpty()
+                cache.replaceApplications(items)
+                Outcome.Success(items)
+            }
         }
 
     suspend fun uploadDocument(
@@ -42,7 +52,6 @@ class LoanRepository(
         return apiCall { api.uploadDocument(applicationId, documentType, part) }.unwrapEnvelope()
     }
 
-    // ---------- plafond ----------
     suspend fun myPlafond(): Outcome<CustomerPlafondDto> =
         apiCall { api.myPlafond() }.unwrapEnvelope()
 
@@ -52,6 +61,10 @@ class LoanRepository(
     suspend fun myUpgradeRequests(): Outcome<List<PlafondRequestDto>> =
         when (val result = apiCall { api.myPlafondRequests() }) {
             is Outcome.Failure -> result
-            is Outcome.Success -> Outcome.Success(result.value.data.orEmpty())
+            is Outcome.Success -> {
+                val items = result.value.data.orEmpty()
+                cache.replaceUpgradeRequests(items)
+                Outcome.Success(items)
+            }
         }
 }

@@ -52,6 +52,30 @@ internal object ImageCompressor {
         return bytes
     }
 
+    fun decodeUpright(
+        contentResolver: ContentResolver,
+        uri: Uri,
+        maxDimension: Int,
+    ): Bitmap? {
+
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+
+        val boundsStream = contentResolver.openInputStream(uri) ?: return null
+        boundsStream.use { BitmapFactory.decodeStream(it, null, bounds) }
+
+        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
+
+        val options = BitmapFactory.Options().apply {
+            inSampleSize = sampleSizeFor(bounds.outWidth, bounds.outHeight, maxDimension)
+        }
+
+        val decoded = contentResolver.openInputStream(uri)?.use {
+            BitmapFactory.decodeStream(it, null, options)
+        } ?: return null
+
+        return scaleWithin(applyExifRotation(contentResolver, uri, decoded), maxDimension)
+    }
+
     private fun sampleSizeFor(width: Int, height: Int, maxDimension: Int): Int {
         var sample = 1
         var longest = maxOf(width, height)

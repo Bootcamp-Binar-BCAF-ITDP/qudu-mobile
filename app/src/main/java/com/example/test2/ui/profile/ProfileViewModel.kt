@@ -24,6 +24,15 @@ class ProfileViewModel(
     var isLoading by mutableStateOf(false)
         private set
 
+    var isRefreshing by mutableStateOf(false)
+        private set
+
+    var showingCached by mutableStateOf(false)
+        private set
+
+    var lastSyncedAt by mutableStateOf<Long?>(null)
+        private set
+
     var uploadingType by mutableStateOf<String?>(null)
         private set
 
@@ -46,20 +55,39 @@ class ProfileViewModel(
         info = null
     }
 
-    fun refresh() {
+    init {
+        viewModelScope.launch {
+            repository.cachedProfile.collect { cached ->
+                val stored = cached.items.firstOrNull() ?: return@collect
+                cached.fetchedAt?.let { lastSyncedAt = it }
+                if (profile == null) profile = stored
+            }
+        }
+    }
+
+    fun refresh(userInitiated: Boolean = false) {
         if (isLoading) return
 
         isLoading = true
+        if (userInitiated) isRefreshing = true
 
         viewModelScope.launch {
-            when (val result = repository.myProfile()) {
-                is Outcome.Success -> {
-                    profile = result.value
-                    error = null
+            try {
+                when (val result = repository.myProfile()) {
+                    is Outcome.Success -> {
+                        profile = result.value
+                        error = null
+                        showingCached = false
+                    }
+                    is Outcome.Failure -> {
+                        showingCached = profile != null
+                        if (profile == null) error = result.message
+                    }
                 }
-                is Outcome.Failure -> error = result.message
+            } finally {
+                isLoading = false
+                isRefreshing = false
             }
-            isLoading = false
         }
     }
 

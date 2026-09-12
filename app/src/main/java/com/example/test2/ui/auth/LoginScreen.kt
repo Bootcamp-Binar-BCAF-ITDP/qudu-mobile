@@ -17,20 +17,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.painterResource
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.test2.R
-import com.example.test2.di.rememberViewModelFactory
 import com.example.test2.ui.apply.*
 
 @Composable
 fun LoginScreen(
+    viewModel: AuthViewModel,
     onLoggedIn: () -> Unit,
     onGoToRegister: () -> Unit,
     onForgotPassword: () -> Unit = {},
     onBack: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
-    val viewModel: AuthViewModel = viewModel(factory = rememberViewModelFactory())
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -44,19 +42,6 @@ fun LoginScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Spacer(Modifier.height(20.dp))
-
-        Text(
-            text = "← Home",
-            fontSize = 14.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = TextSecondary,
-            modifier = Modifier
-                .align(Alignment.Start)
-                .clickable {
-                    viewModel.clearMessages()
-                    onBack()
-                },
-        )
 
         Spacer(Modifier.height(24.dp))
 

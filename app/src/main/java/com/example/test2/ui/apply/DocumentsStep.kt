@@ -40,15 +40,10 @@ fun DocumentsStep(
     modifier: Modifier = Modifier,
 ) {
     val capture = rememberDocumentCapture { type, uri -> state.setDocumentUri(type, uri) }
-    // A type is satisfied when it was captured in this flow, or is already on
-    // file and still fresh. Financial evidence expires, so a stored payslip past
-    // its window counts as missing here exactly as it does on the server.
     val missing = DocumentTypes.REQUIRED_FOR_SUBMISSION.filter { type ->
         !state.isCaptured(type) && profile?.needsUpload(type) != false
     }
 
-    // Named only after the customer tries to continue - see the block near the
-    // buttons. Listing what is absent before they have started is nagging.
     var showMissing by remember { mutableStateOf(false) }
 
     Column(
@@ -156,9 +151,6 @@ fun DocumentsStep(
             }
         }
 
-        // Named, not just counted. The button used to be disabled and say
-        // "2 file(s) missing", which tells a customer they are stuck without
-        // telling them which two.
         if (showMissing && missing.isNotEmpty()) {
             Spacer(Modifier.height(16.dp))
             Text(

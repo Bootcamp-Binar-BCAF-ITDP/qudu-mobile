@@ -3,7 +3,10 @@ package com.example.test2.data.repository
 import android.content.ContentResolver
 import android.net.Uri
 import com.example.test2.core.Outcome
+import com.example.test2.data.local.CachedList
+import com.example.test2.data.local.ProfileCache
 import com.example.test2.data.remote.ApiService
+import kotlinx.coroutines.flow.Flow
 import com.example.test2.data.dto.CustomerDocumentDto
 import com.example.test2.data.dto.CustomerProfileDto
 import com.example.test2.data.dto.ProfileUpdateRequestDto
@@ -11,10 +14,16 @@ import com.example.test2.data.dto.ProfileUpdateRequestDto
 class ProfileRepository(
     private val api: ApiService,
     private val contentResolver: ContentResolver,
+    private val cache: ProfileCache,
 ) {
 
-    suspend fun myProfile(): Outcome<CustomerProfileDto> =
-        apiCall { api.myProfile() }.unwrapEnvelope()
+    val cachedProfile: Flow<CachedList<CustomerProfileDto>> = cache.profile
+
+    suspend fun myProfile(): Outcome<CustomerProfileDto> {
+        val result = apiCall { api.myProfile() }.unwrapEnvelope()
+        if (result is Outcome.Success) cache.replace(result.value)
+        return result
+    }
 
     suspend fun updateProfile(
         phoneNumber: String,
@@ -31,7 +40,6 @@ class ProfileRepository(
             is Outcome.Success -> Outcome.Success(result.value.data.orEmpty())
         }
 
-    /** Upload or replace one identity paper (KTP / KK / SELFIE). */
     suspend fun uploadDocument(documentType: String, uri: Uri): Outcome<CustomerDocumentDto> {
 
         val part = when (val prepared = filePartFrom(contentResolver, uri, documentType)) {

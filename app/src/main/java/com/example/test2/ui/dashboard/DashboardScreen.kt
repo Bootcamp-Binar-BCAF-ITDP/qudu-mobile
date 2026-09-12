@@ -30,7 +30,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -41,6 +40,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.test2.ui.apply.OutlineButton
@@ -48,10 +48,10 @@ import com.example.test2.ui.apply.PrimaryButton
 import com.example.test2.ui.apply.SectionCard
 import com.example.test2.ui.simulator.SimulatorPanel
 import com.example.test2.ui.simulator.SimulatorViewModel
+import com.example.test2.ui.common.RefreshableScreen
 import com.example.test2.ui.common.StatusChip
 import com.example.test2.ui.common.UnreadBadge
 
-/* ---------- Palette (local so it does not fight your Material theme) ---------- */
 
 private val Green = Color(0xFF0B6B2E)
 private val ScreenBg = Color(0xFFF6F8FA)
@@ -67,7 +67,6 @@ private val Warn = Color(0xFFB25E02)
 
 private val CardShape = RoundedCornerShape(16.dp)
 
-/* ---------- Screen ---------- */
 @Composable
 fun DashboardScreen(
     signedIn: Boolean = true,
@@ -78,58 +77,42 @@ fun DashboardScreen(
     errorMessage: String? = null,
     profileComplete: Boolean = true,
     missingDocuments: List<String> = emptyList(),
-    unreadCount: Long = 0,
     simulatorViewModel: SimulatorViewModel? = null,
     onApplyLoan: () -> Unit = {},
     onCompleteProfile: () -> Unit = {},
     onSeeLoans: () -> Unit = {},
-    onAlerts: () -> Unit = {},
+    onBills: () -> Unit = {},
     onRequestUpgrade: () -> Unit = {},
     onLogin: () -> Unit = {},
     onRegister: () -> Unit = {},
+    isRefreshing: Boolean = false,
+    onRefresh: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+  RefreshableScreen(isRefreshing = isRefreshing, onRefresh = onRefresh, modifier = modifier) {
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .background(ScreenBg)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp)
     ) {
-        Spacer(Modifier.height(24.dp))
 
-        // One layout for both states. A signed-out visitor sees the same page a
-        // customer does, minus the parts that describe an account they do not
-        // have yet - not a different screen. Everything account-shaped below is
-        // gated on `signedIn` individually rather than by swapping the body.
-        Text(
-            text = if (signedIn) "Welcome back, $userName." else "Welcome to QuickDuit.",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            color = TextPrimary
-        )
-        Spacer(Modifier.height(4.dp))
-        Text(
-            text = if (signedIn) {
-                "Here is an overview of your loan activity."
-            } else {
-                "Fast loans, simple process. Simulate an instalment here - " +
-                    "signing in is only needed when you actually apply."
-            },
-            fontSize = 15.sp,
-            color = TextSecondary
-        )
 
-        // Nothing to complete before there is an account to complete it on.
         if (signedIn && !profileComplete) {
             Spacer(Modifier.height(20.dp))
             CompleteProfileCard(missing = missingDocuments, onClick = onCompleteProfile)
         }
 
-        // Shown to everyone. Tapping it while signed out routes to Login through
-        // `navigate()` in the shell, which is where applying is gated - the card
-        // itself never pretends to be unavailable.
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(14.dp))
+
+        if (signedIn) {
+            Spacer(Modifier.height(14.dp))
+            PlafondCard(plafond = plafond, onRequestUpgrade = onRequestUpgrade)
+        }
+
+        Spacer(Modifier.height(14.dp))
+
         ApplyLoanCard(onClick = onApplyLoan)
 
         Spacer(Modifier.height(14.dp))
@@ -141,24 +124,13 @@ fun DashboardScreen(
                 modifier = Modifier.weight(1f)
             )
             TileCard(
-                icon = Icons.Filled.Notifications,
-                label = "Alerts",
-                onClick = onAlerts,
-                badgeCount = unreadCount,
+                icon = Icons.Filled.DateRange,
+                label = "Bills",
+                onClick = onBills,
                 modifier = Modifier.weight(1f)
             )
         }
 
-        // The plafond limit is account data - a guest has no limit, so the card
-        // is absent rather than showing zeroes or a placeholder that reads like
-        // an offer. Requesting an increase lives on it, so that is gated too.
-        if (signedIn) {
-            Spacer(Modifier.height(14.dp))
-            PlafondCard(plafond = plafond, onRequestUpgrade = onRequestUpgrade)
-        }
-
-        // Signed-out failures are not this screen's to report: the ViewModel is
-        // never asked to load without a session.
         if (signedIn && errorMessage != null) {
             Spacer(Modifier.height(14.dp))
             Text(
@@ -173,25 +145,23 @@ fun DashboardScreen(
             CurrentApplicationCard(application = latestApplication, isLoading = isLoading)
         }
 
-        // The simulator on Home is the same panel as the Simulate tab, driven by
-        // the same ViewModel - two copies would drift apart the moment a tier
-        // changed. It is null only in a preview, where there is no container.
-        if (simulatorViewModel != null) {
-            Spacer(Modifier.height(14.dp))
-            SectionCard(padding = 22) {
-                Text(
-                    text = "Loan Simulator",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextPrimary,
-                )
-                Spacer(Modifier.height(16.dp))
-                SimulatorPanel(simulatorViewModel, showTierRail = false)
+
+        if (!signedIn) {
+            if (simulatorViewModel != null) {
+                Spacer(Modifier.height(14.dp))
+                SectionCard(padding = 22) {
+                    Text(
+                        text = "Loan Simulator",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextPrimary,
+                    )
+                    Spacer(Modifier.height(16.dp))
+                    SimulatorPanel(simulatorViewModel, showTierRail = false)
+                }
             }
         }
 
-        // The only entry point to signing in that a guest can see: the top bar
-        // hides its profile and notification actions until there is a session.
         if (!signedIn) {
             Spacer(Modifier.height(20.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -206,9 +176,9 @@ fun DashboardScreen(
 
         Spacer(Modifier.height(28.dp))
     }
+  }
 }
 
-/* ---------- Cards ---------- */
 @Composable
 private fun CompleteProfileCard(missing: List<String>, onClick: () -> Unit) {
     Column(
@@ -464,7 +434,6 @@ private fun CurrentApplicationCard(application: LoanApplicationDto?, isLoading: 
     }
 }
 
-/* ---------- Stepper ---------- */
 private enum class StepState { Done, Active, Todo }
 
 @Composable

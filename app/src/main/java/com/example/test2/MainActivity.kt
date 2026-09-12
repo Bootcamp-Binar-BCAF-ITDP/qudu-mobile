@@ -20,7 +20,7 @@ class MainActivity : ComponentActivity() {
 
     private val notificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { /* Declined only means no loan-status pushes; the app still works. */ }
+    ) {  }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -41,8 +41,10 @@ import com.example.test2.ui.apply.TextMuted
 import com.example.test2.ui.apply.TextPrimary
 import com.example.test2.ui.apply.TextSecondary
 import com.example.test2.ui.common.ApplicationCard
+import com.example.test2.ui.common.CachedDataNotice
 import com.example.test2.ui.common.EmptyState
 import com.example.test2.ui.common.ErrorText
+import com.example.test2.ui.common.RefreshableScreen
 import com.example.test2.ui.common.SignInPrompt
 import com.example.test2.ui.loans.ApplicationsViewModel
 
@@ -80,8 +82,13 @@ fun HistoryScreen(
         return
     }
 
+  RefreshableScreen(
+      isRefreshing = viewModel.isRefreshing,
+      onRefresh = { viewModel.refresh(userInitiated = true) },
+      modifier = modifier,
+  ) {
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .background(ScreenBg)
             .verticalScroll(rememberScrollState())
@@ -89,23 +96,17 @@ fun HistoryScreen(
     ) {
         Spacer(Modifier.height(20.dp))
 
-        Text(
-            text = "History",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            color = TextPrimary,
-        )
-        Spacer(Modifier.height(4.dp))
-        Text(
-            text = "All of your applications and limit requests.",
-            fontSize = 15.sp,
-            color = TextSecondary,
-        )
 
-        Spacer(Modifier.height(16.dp))
         FilterTabs(selected = filter, onSelect = { filter = it })
 
-        ErrorText(viewModel.error, Modifier.padding(top = 14.dp))
+        CachedDataNotice(
+            visible = viewModel.showingCached,
+            fetchedAt = viewModel.lastSyncedAt,
+            modifier = Modifier.padding(top = 14.dp),
+        )
+        if (!viewModel.showingCached) {
+            ErrorText(viewModel.error, Modifier.padding(top = 14.dp))
+        }
 
         Spacer(Modifier.height(16.dp))
 
@@ -146,6 +147,7 @@ fun HistoryScreen(
 
         Spacer(Modifier.height(28.dp))
     }
+  }
 }
 
 @Composable

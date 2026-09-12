@@ -31,7 +31,9 @@ import com.example.test2.ui.apply.TextPrimary
 import com.example.test2.ui.apply.TextMuted
 import com.example.test2.ui.apply.TextSecondary
 import com.example.test2.ui.common.ApplicationCard
+import com.example.test2.ui.common.CachedDataNotice
 import com.example.test2.ui.common.EmptyState
+import com.example.test2.ui.common.RefreshableScreen
 import com.example.test2.ui.common.ErrorText
 import com.example.test2.ui.common.SectionTitle
 
@@ -45,15 +47,17 @@ fun LoansScreen(
 ) {
     LaunchedEffect(signedIn) { if (signedIn) viewModel.refresh() }
 
-    // No sign-in wall: the page renders normally for a visitor too, just empty.
-    // The lists are empty because the ViewModel is never asked to load without a
-    // session, not because anything failed.
     val active = viewModel.active
     val inReview = active.filter { it.status != LoanStatus.DISBURSED }
     val running = viewModel.disbursed
 
+  RefreshableScreen(
+      isRefreshing = viewModel.isRefreshing,
+      onRefresh = { if (signedIn) viewModel.refresh(userInitiated = true) },
+      modifier = modifier,
+  ) {
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .background(ScreenBg)
             .verticalScroll(rememberScrollState())
@@ -61,24 +65,8 @@ fun LoansScreen(
     ) {
         Spacer(Modifier.height(20.dp))
 
-        Text(
-            text = "My Loans",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            color = TextPrimary,
-        )
-        Spacer(Modifier.height(4.dp))
-        Text(
-            text = "Applications in progress and loans already disbursed.",
-            fontSize = 15.sp,
-            color = TextSecondary,
-        )
 
-        // Limit and "request an increase" are both account data, so the whole
-        // card is absent for a visitor rather than showing an empty limit that
-        // reads like an offer of nothing.
         if (signedIn) {
-            Spacer(Modifier.height(18.dp))
             LimitCard(
                 available = (viewModel.plafond?.availableLimit
                     ?: viewModel.plafond?.approvedLimit
@@ -92,6 +80,12 @@ fun LoansScreen(
             ErrorText(viewModel.error, Modifier.padding(top = 14.dp))
         }
 
+        CachedDataNotice(
+            visible = viewModel.showingCached,
+            fetchedAt = viewModel.lastSyncedAt,
+            modifier = Modifier.padding(top = 14.dp),
+        )
+
         Spacer(Modifier.height(20.dp))
         SectionTitle("In progress")
         Spacer(Modifier.height(10.dp))
@@ -99,10 +93,8 @@ fun LoansScreen(
         if (inReview.isEmpty()) {
             EmptyState(
                 title = if (viewModel.isLoading) "Loading..." else "No applications in progress",
-                // The signed-in copy promises stored documents, which a visitor
-                // does not have - saying it to them would be a small lie.
                 message = if (signedIn) {
-                    "Apply any time - your identity documents are already on file."
+                    "Apply any time"
                 } else {
                     "Sign in to apply for a loan and follow it through every stage."
                 },
@@ -138,6 +130,7 @@ fun LoansScreen(
 
         Spacer(Modifier.height(28.dp))
     }
+  }
 }
 
 @Composable

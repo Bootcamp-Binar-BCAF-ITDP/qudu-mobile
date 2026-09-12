@@ -66,10 +66,6 @@ class ApplyViewModel(
                 return@launch
             }
 
-            // Every captured file goes up before the application exists. The
-            // backend refuses to create one whose paperwork is incomplete, so a
-            // failure here has to stop the submission rather than be reported
-            // afterwards - which is what used to leave empty applications behind.
             val uploadError = uploadCapturedDocuments(state)
             if (uploadError != null) {
                 error = uploadError
@@ -102,9 +98,6 @@ class ApplyViewModel(
                     if (applicationId == null) {
                         error = "The server did not return an application number."
                     } else {
-                        // Nothing to upload here any more: the backend snapshots
-                        // the customer's documents onto the application as it
-                        // creates it.
                         createdApplicationId = applicationId
                         onSubmitted(applicationId)
                     }
@@ -115,15 +108,6 @@ class ApplyViewModel(
         }
     }
 
-    /**
-     * Sends every file captured in this flow to the customer document store.
-     *
-     * All five types live there now - identity papers and financial evidence
-     * alike - which is what lets the backend refuse an application before it
-     * exists. A replaced KTP and a fresh payslip take the same path.
-     *
-     * @return the first failure, or null when everything landed.
-     */
     private suspend fun uploadCapturedDocuments(state: ApplyLoanState): String? {
 
         for ((documentType, uri) in state.documentUris) {
@@ -137,11 +121,6 @@ class ApplyViewModel(
         return null
     }
 
-    /**
-     * Form fields only. Documents are gated by DocumentsStep, which can see the
-     * profile and so knows whether a stored payslip is still fresh; repeating a
-     * cruder check here would block submissions the server would have accepted.
-     */
     private fun validate(state: ApplyLoanState): String? {
 
         return when {

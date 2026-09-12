@@ -27,8 +27,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.test2.di.rememberViewModelFactory
 import com.example.test2.ui.apply.AppTextField
 import com.example.test2.ui.apply.FieldLabel
 import com.example.test2.ui.apply.Green
@@ -43,11 +41,11 @@ import com.example.test2.ui.apply.TextSecondary
 
 @Composable
 fun ForgotPasswordScreen(
+    viewModel: AuthViewModel,
     onDone: () -> Unit,
     onBackToLogin: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val viewModel: AuthViewModel = viewModel(factory = rememberViewModelFactory())
 
     var codeSent by remember { mutableStateOf(false) }
     var email by remember { mutableStateOf("") }

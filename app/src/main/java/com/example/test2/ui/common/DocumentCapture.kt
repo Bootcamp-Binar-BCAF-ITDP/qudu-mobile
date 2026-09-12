@@ -31,6 +31,9 @@ fun rememberDocumentCapture(onCaptured: (documentType: String, uri: Uri) -> Unit
         if (uri != null && type != null) onCaptured(type, uri)
     }
 
+    var previewType by remember { mutableStateOf<String?>(null) }
+    var previewUri by remember { mutableStateOf<Uri?>(null) }
+
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture(),
     ) { success ->
@@ -38,7 +41,10 @@ fun rememberDocumentCapture(onCaptured: (documentType: String, uri: Uri) -> Unit
         val type = pendingType
         pendingCaptureUri = null
         pendingType = null
-        if (success && uri != null && type != null) onCaptured(type, uri)
+        if (success && uri != null && type != null) {
+            previewType = type
+            previewUri = uri
+        }
     }
 
     fun launchCamera() {
@@ -55,6 +61,31 @@ fun rememberDocumentCapture(onCaptured: (documentType: String, uri: Uri) -> Unit
         } else {
             pendingType = null
         }
+    }
+
+    val confirmingType = previewType
+    val confirmingUri = previewUri
+
+    if (confirmingType != null && confirmingUri != null) {
+        PhotoPreviewDialog(
+            uri = confirmingUri,
+            title = DocumentTypes.label(confirmingType),
+            onConfirm = {
+                previewType = null
+                previewUri = null
+                onCaptured(confirmingType, confirmingUri)
+            },
+            onRetake = {
+                previewUri = null
+                previewType = null
+                pendingType = confirmingType
+                launchCamera()
+            },
+            onDismiss = {
+                previewType = null
+                previewUri = null
+            },
+        )
     }
 
     return remember(context) {

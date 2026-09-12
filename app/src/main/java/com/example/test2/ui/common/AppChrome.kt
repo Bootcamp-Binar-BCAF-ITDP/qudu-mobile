@@ -17,12 +17,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,7 +26,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -42,18 +37,12 @@ import com.example.test2.ui.apply.Green
 import com.example.test2.ui.apply.ScreenBg
 import com.example.test2.ui.apply.TextPrimary
 import com.example.test2.ui.apply.TextSecondary
+import com.example.test2.ui.navigation.TopLevelDestination
 
 
 private val GreenPill = Color(0xFF7BE0A5)
 private val RedDot = Color(0xFFE5342A)
 
-enum class AppTab(val label: String, val icon: ImageVector) {
-    Home("Home", Icons.Filled.Home),
-    Simulate("Simulate", Icons.Filled.Calculate),
-    Loans("Loans", Icons.Filled.List),
-    History("History", Icons.Filled.Refresh),
-    Profile("Profile", Icons.Filled.Person),
-}
 
 @Composable
 fun QuDuTopBar(
@@ -140,7 +129,10 @@ fun UnreadBadge(count: Long, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun QuDuBottomBar(selected: AppTab, onSelect: (AppTab) -> Unit) {
+fun QuDuBottomBar(
+    selected: TopLevelDestination,
+    onSelect: (TopLevelDestination) -> Unit,
+) {
     Column {
         HairLine()
         Row(
@@ -150,12 +142,12 @@ fun QuDuBottomBar(selected: AppTab, onSelect: (AppTab) -> Unit) {
                 .padding(vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            AppTab.entries.forEach { tab ->
+            TopLevelDestination.entries.forEach { tab ->
                 val isSelected = tab == selected
                 Column(
                     modifier = Modifier
                         .weight(1f)
-                        .clickable { onSelect(tab) },
+                        .clickable(enabled = !isSelected) { onSelect(tab) },
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Box(

@@ -28,8 +28,7 @@ internal suspend fun <T> apiCall(
         }
     } catch (e: IOException) {
         Outcome.Failure(
-            "Cannot reach the server. Check your connection and make sure " +
-                "QuDu-be is running.",
+            "Cannot reach the server. Check your connection",
         )
     } catch (e: Exception) {
         Outcome.Failure(e.message ?: "Something went wrong. Please try again.")

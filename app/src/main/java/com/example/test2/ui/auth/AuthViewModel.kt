@@ -13,7 +13,6 @@ import kotlinx.coroutines.launch
 
 const val RESET_CODE_LENGTH = 6
 
-/** Digits in the signup code. Mirrors com.delvin.loan.common.OtpCodes.LENGTH. */
 const val REGISTRATION_OTP_LENGTH = 6
 
 const val MIN_RESET_PASSWORD_LENGTH = 8
@@ -95,15 +94,6 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
         )
     }
 
-    /**
-     * Step 1 of signup: validate the whole form, then ask for an email code.
-     *
-     * The form is checked before the code is requested, so somebody with a typo
-     * in their NIK finds out now rather than after waiting on an email.
-     *
-     * @param onAlreadyRegistered the address already has an account. The screen
-     *        sends them to login rather than showing an error they cannot act on.
-     */
     fun requestRegistrationOtp(
         form: RegisterForm,
         onSent: () -> Unit,
@@ -139,11 +129,6 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
         }
     }
 
-    /**
-     * Step 2 of signup: send the form back together with the emailed code.
-     *
-     * The backend assigns plafond level 1 by itself, so nothing here picks one.
-     */
     fun register(form: RegisterForm, otp: String, onSuccess: () -> Unit) {
 
         val validationError = form.firstError() ?: when {

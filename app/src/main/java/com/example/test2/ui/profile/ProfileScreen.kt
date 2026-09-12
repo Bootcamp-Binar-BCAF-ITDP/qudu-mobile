@@ -52,6 +52,8 @@ import com.example.test2.ui.apply.TextMuted
 import com.example.test2.ui.apply.TextPrimary
 import com.example.test2.ui.apply.TextSecondary
 import com.example.test2.ui.auth.MessageArea
+import com.example.test2.ui.common.CachedDataNotice
+import com.example.test2.ui.common.RefreshableScreen
 import com.example.test2.ui.common.SectionTitle
 import com.example.test2.ui.common.SignInPrompt
 import com.example.test2.ui.common.rememberDocumentCapture
@@ -79,7 +81,7 @@ fun ProfileScreen(
         SignInPrompt(
             title = "Sign in to manage your profile",
             message = "Your personal details and identity documents live here - upload " +
-                "them once and every application reuses them automatically.",
+                    "them once and every application reuses them automatically.",
             points = listOf(
                 "Store your ID card, family card and selfie just once",
                 "Keep your phone number, address and occupation up to date",
@@ -92,14 +94,25 @@ fun ProfileScreen(
         return
     }
 
+  RefreshableScreen(
+      isRefreshing = viewModel.isRefreshing,
+      onRefresh = { viewModel.refresh(userInitiated = true) },
+      modifier = modifier,
+  ) {
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .background(ScreenBg)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp),
     ) {
         Spacer(Modifier.height(20.dp))
+
+        CachedDataNotice(
+            visible = viewModel.showingCached,
+            fetchedAt = viewModel.lastSyncedAt,
+            modifier = Modifier.padding(bottom = 14.dp),
+        )
 
         IdentityHeader(
             name = profile?.customerName.orEmpty().ifBlank { "Customer" },
@@ -117,27 +130,28 @@ fun ProfileScreen(
             Spacer(Modifier.height(14.dp))
 
             ReadOnlyRow("NIK", profile?.nik)
-            ReadOnlyRow("Place and date of birth", listOfNotNull(
-                profile?.birthPlace?.takeIf { it.isNotBlank() },
-                profile?.birthDate,
-            ).joinToString(", ").ifBlank { null })
-            ReadOnlyRow("Gender", when (profile?.sex) {
-                "MALE" -> "Male"
-                "FEMALE" -> "Female"
-                else -> profile?.sex
-            })
+            ReadOnlyRow(
+                "Place and date of birth", listOfNotNull(
+                    profile?.birthPlace?.takeIf { it.isNotBlank() },
+                    profile?.birthDate,
+                ).joinToString(", ").ifBlank { null })
+            ReadOnlyRow(
+                "Gender", when (profile?.sex) {
+                    "MALE" -> "Male"
+                    "FEMALE" -> "Female"
+                    else -> profile?.sex
+                }
+            )
             ReadOnlyRow("Citizenship", profile?.citizenship)
 
             Spacer(Modifier.height(6.dp))
             Text(
-                text = "Name, NIK and date of birth follow the ID card on file. " +
-                    "Contact your branch if anything is wrong.",
+                text = "Contact customer service if change anything.",
                 fontSize = 12.sp,
                 color = TextMuted,
             )
         }
 
-        Spacer(Modifier.height(16.dp))
         SectionCard {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 SectionTitle("Contact", Modifier.weight(1f))
@@ -204,7 +218,7 @@ fun ProfileScreen(
             SectionTitle("Identity Documents")
             Spacer(Modifier.height(4.dp))
             Text(
-                text = "Reused by every application. Tap one to replace it.",
+                text = "Tap one to replace document.",
                 fontSize = 13.sp,
                 color = TextSecondary,
             )
@@ -233,7 +247,7 @@ fun ProfileScreen(
             Spacer(Modifier.height(8.dp))
             Text(
                 text = (profile?.availableLimit ?: profile?.approvedLimit
-                    ?: profile?.plafond?.maxAmount).asRupiah(),
+                ?: profile?.plafond?.maxAmount).asRupiah(),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = TextPrimary,
@@ -243,7 +257,7 @@ fun ProfileScreen(
             if (drawnDown) {
                 Text(
                     text = "Limit ${profile?.approvedLimit.asRupiah()} · " +
-                        "${profile?.usedLimit.asRupiah()} in use on disbursed loans",
+                            "${profile?.usedLimit.asRupiah()} in use on disbursed loans",
                     fontSize = 13.sp,
                     color = TextMuted,
                 )
@@ -270,6 +284,7 @@ fun ProfileScreen(
 
         Spacer(Modifier.height(28.dp))
     }
+  }
 }
 
 @Composable
@@ -318,7 +333,7 @@ private fun IncompleteBanner(missing: List<String>) {
         Spacer(Modifier.height(4.dp))
         Text(
             text = "Not uploaded yet: " + missing.joinToString(", ") { DocumentTypes.label(it) } +
-                ". You can file a new loan application once these are complete.",
+                    ". You can file a new loan application once these are complete.",
             fontSize = 13.sp,
             color = TextSecondary,
         )

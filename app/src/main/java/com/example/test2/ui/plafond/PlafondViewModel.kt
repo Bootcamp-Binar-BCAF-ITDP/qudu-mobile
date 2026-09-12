@@ -22,21 +22,48 @@ class PlafondViewModel(private val repository: LoanRepository) : ViewModel() {
     var requests by mutableStateOf<List<PlafondRequestDto>>(emptyList())
         private set
 
-    fun loadRequests() {
+    var lastSyncedAt by mutableStateOf<Long?>(null)
+        private set
+
+    var showingCached by mutableStateOf(false)
+        private set
+
+    var isRefreshing by mutableStateOf(false)
+        private set
+
+    var isLoadingRequests by mutableStateOf(false)
+        private set
+
+    init {
         viewModelScope.launch {
-            when (val result = repository.myUpgradeRequests()) {
-                is Outcome.Success -> requests = result.value
-                is Outcome.Failure -> error = result.message
+            repository.cachedUpgradeRequests.collect { cached ->
+                requests = cached.items
+                cached.fetchedAt?.let { lastSyncedAt = it }
             }
         }
     }
 
-    /**
-     * @param onSubmitted called with the confirmation once the request lands.
-     *        The screen leaves for Home on success, so the message has to
-     *        travel with the caller - an inline notice on a screen nobody is
-     *        looking at any more is not a confirmation.
-     */
+    fun loadRequests(userInitiated: Boolean = false) {
+        if (isLoadingRequests) return
+        isLoadingRequests = true
+        if (userInitiated) isRefreshing = true
+
+        viewModelScope.launch {
+            try {
+                when (val result = repository.myUpgradeRequests()) {
+                    is Outcome.Success -> showingCached = false
+                    is Outcome.Failure -> {
+                        showingCached = requests.isNotEmpty()
+                        if (requests.isEmpty()) error = result.message
+                    }
+                }
+            } finally {
+                isLoadingRequests = false
+                isRefreshing = false
+            }
+        }
+    }
+
     fun submit(amountText: String, onSubmitted: (String) -> Unit = {}) {
 
         if (isBusy) return
@@ -58,6 +85,7 @@ class PlafondViewModel(private val repository: LoanRepository) : ViewModel() {
                     onSubmitted(SUBMITTED_MESSAGE)
                     return@launch
                 }
+
                 is Outcome.Failure -> error = result.message
             }
             isBusy = false

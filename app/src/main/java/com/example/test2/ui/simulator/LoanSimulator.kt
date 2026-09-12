@@ -41,14 +41,6 @@ private val Amber = Color(0xFFB25E02)
 
 private val AmberBg = Color(0xFFFFF6E5)
 
-/**
- * The simulator body, shared by the Home card and the Simulate tab.
- *
- * Everything numeric comes off [viewModel], including the slider bounds: the
- * amount range is the union of the tiers on offer and the tenor range belongs
- * to whichever tier the current amount falls in, so the two sliders cannot
- * between them describe a loan that does not exist.
- */
 @Composable
 fun SimulatorPanel(
     viewModel: SimulatorViewModel,
@@ -123,8 +115,6 @@ fun SimulatorPanel(
             modifier = Modifier.fillMaxWidth(),
         )
 
-        // The bundled rate card is a fallback, not a secret. Saying so is the
-        // difference between an old quote and a wrong one.
         if (!viewModel.live) {
             Spacer(Modifier.height(10.dp))
             Text(
@@ -170,18 +160,11 @@ private fun TenorField(viewModel: SimulatorViewModel, tier: LoanTier?) {
         value = viewModel.tenor.toFloat(),
         onValueChange = { viewModel.updateTenor(it.roundToInt()) },
         valueRange = minTenor.toFloat()..maxTenor.toFloat(),
-        // No steps: the range changes with the tier, and a fixed step count
-        // would quantise the wrong way on every tier but one.
         colors = simulatorSliderColors(),
     )
     RangeLabels("$minTenor months", "$maxTenor months")
 }
 
-/**
- * Which tier the current amount sits in, and - on the tab - where it sits
- * among the others. The rail is what makes "the rate improves as you borrow
- * more" visible rather than something to be discovered by dragging.
- */
 @Composable
 private fun TierBadge(tier: LoanTier, showRail: Boolean) {
     Column(
@@ -226,7 +209,6 @@ private fun TierBadge(tier: LoanTier, showRail: Boolean) {
     }
 }
 
-/** All tiers at once, so the whole ladder is legible without dragging a slider. */
 @Composable
 fun TierTable(tiers: List<LoanTier>, currentLevel: Int?, modifier: Modifier = Modifier) {
     SectionCard(modifier = modifier) {

@@ -21,13 +21,6 @@ import java.io.File
 import java.io.FileOutputStream
 import kotlin.random.Random
 
-/**
- * Runs the real compressor against a real photo on a real device, because the
- * bug this guards was invisible to reading: `openInputStream(uri)?.use { decode }
- * ?: return null` looks correct, and returns null every time when the decoder is
- * in inJustDecodeBounds mode. Nothing short of executing it would have caught
- * that - BitmapFactory is a framework class, so a JVM unit test cannot.
- */
 @RunWith(AndroidJUnit4::class)
 class ImageCompressorTest {
 
@@ -62,7 +55,6 @@ class ImageCompressorTest {
         )
     }
 
-    /** A photo already smaller than the cap must survive without being upscaled. */
     @Test
     fun leavesSmallPhotoWithinItsOriginalDimensions() {
         val uri = writeSamplePhoto("compressor_small.jpg", width = 800, height = 600)
@@ -81,7 +73,6 @@ class ImageCompressorTest {
         assertEquals(600, decoded.height)
     }
 
-    /** The integration point that actually broke: the selfie upload path. */
     @Test
     fun buildsAMultipartPartForACapturedSelfie() = runBlocking {
         val uri = writeSamplePhoto("compressor_selfie.jpg", width = 2000, height = 1500)
@@ -101,16 +92,10 @@ class ImageCompressorTest {
         assertTrue("part must carry bytes", part.body.contentLength() > 0)
     }
 
-    /**
-     * Writes a JPEG through the same FileProvider path the camera capture uses,
-     * so the test reads it back exactly the way the app does.
-     */
     private fun writeSamplePhoto(name: String, width: Int, height: Int): Uri {
 
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
 
-        // Noise, not a flat fill: a solid colour compresses to a few kilobytes
-        // and would pass the budget assertion without the resizing ever mattering.
         val random = Random(42)
         val row = IntArray(width)
         for (y in 0 until height) {

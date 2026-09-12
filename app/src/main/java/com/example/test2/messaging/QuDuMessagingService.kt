@@ -30,17 +30,6 @@ class QuDuMessagingService : FirebaseMessagingService() {
         }
     }
 
-    /**
-     * Only called while the app is in the foreground.
-     *
-     * The backend sends a `notification` payload alongside its data
-     * (`PushNotificationService.sendToCustomer`), and Android hands those
-     * straight to the system tray when the app is backgrounded or dead - this
-     * method never runs then. That is why the in-app refresh below is paired
-     * with an ON_RESUME refresh in `QuickDuitApp`: between them they cover both
-     * states. Adding one without the other looks like it works right up until
-     * someone locks their phone.
-     */
     override fun onMessageReceived(message: RemoteMessage) {
 
         val title = message.notification?.title
@@ -55,9 +44,6 @@ class QuDuMessagingService : FirebaseMessagingService() {
 
         showNotification(title, body, reference)
 
-        // A decision landed, so whatever is on screen is now out of date - most
-        // visibly the plafond limit. Published before any check on whether the
-        // UI is listening: an unheard event costs nothing.
         (application as? QuDuApplication)
             ?.container
             ?.appEvents

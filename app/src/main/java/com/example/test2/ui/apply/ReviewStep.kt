@@ -172,9 +172,6 @@ fun ReviewStep(
             trailingIcon = Icons.Filled.Send
         )
 
-        // A way out that is not "Edit" on one card: the customer who wants to
-        // revisit the whole of step 2 should not have to guess which card links
-        // back to it.
         Spacer(Modifier.height(12.dp))
         OutlineButton(
             text = "Back to Loan Details",

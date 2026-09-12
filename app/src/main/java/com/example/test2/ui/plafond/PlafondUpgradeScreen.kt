@@ -16,16 +16,12 @@ import com.example.test2.di.rememberViewModelFactory
 import com.example.test2.ui.apply.*
 import com.example.test2.core.DocumentTypes
 import com.example.test2.ui.auth.MessageArea
+import com.example.test2.ui.common.CachedDataNotice
+import com.example.test2.ui.common.RefreshableScreen
 import com.example.test2.ui.common.rememberDocumentCapture
 import com.example.test2.ui.profile.DocumentRow
 import com.example.test2.ui.profile.ProfileViewModel
 
-/**
- * @param profileViewModel the shared one from QuickDuitApp, so a document
- *        uploaded here is the same document the apply flow sees.
- * @param onSubmitted the request landed - the shell takes the customer home and
- *        shows the confirmation there.
- */
 @Composable
 fun PlafondUpgradeScreen(
     profileViewModel: ProfileViewModel,
@@ -38,8 +34,6 @@ fun PlafondUpgradeScreen(
     var amount by remember { mutableStateOf("") }
 
     val profile = profileViewModel.profile
-    // Missing *and* stale both block a submission, so the button counts them
-    // together - the backend refuses on either.
     val blocking = DocumentTypes.REQUIRED_FOR_SUBMISSION.filter { profile?.needsUpload(it) != false }
     val capture = rememberDocumentCapture { type, uri -> profileViewModel.uploadDocument(type, uri) }
 
@@ -48,8 +42,16 @@ fun PlafondUpgradeScreen(
         profileViewModel.refresh()
     }
 
+  RefreshableScreen(
+      isRefreshing = viewModel.isRefreshing,
+      onRefresh = {
+          viewModel.loadRequests(userInitiated = true)
+          profileViewModel.refresh(userInitiated = true)
+      },
+      modifier = modifier,
+  ) {
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .background(ScreenBg)
             .verticalScroll(rememberScrollState())
@@ -88,8 +90,6 @@ fun PlafondUpgradeScreen(
                 keyboardType = KeyboardType.Number,
             )
 
-            // Success is reported by the shell as a snackbar on Home, so only
-            // failures have anything to say here.
             MessageArea(error = viewModel.error, info = null)
 
             Spacer(Modifier.height(20.dp))
@@ -103,8 +103,6 @@ fun PlafondUpgradeScreen(
                 enabled = !viewModel.isBusy && blocking.isEmpty(),
                 onClick = {
                     viewModel.submit(amount) { message ->
-                        // Cleared before leaving so coming back does not show a
-                        // stale amount pre-typed into a fresh request.
                         amount = ""
                         onSubmitted(message)
                     }
@@ -112,9 +110,6 @@ fun PlafondUpgradeScreen(
             )
         }
 
-        // The branch manager decides a limit increase on the same evidence a
-        // loan application carries, so the same five papers are required - and
-        // the backend refuses the request outright without them.
         Spacer(Modifier.height(16.dp))
         SectionCard {
             Text(
@@ -158,6 +153,12 @@ fun PlafondUpgradeScreen(
                 modifier = Modifier.padding(bottom = 12.dp),
             )
 
+            CachedDataNotice(
+                visible = viewModel.showingCached,
+                fetchedAt = viewModel.lastSyncedAt,
+                modifier = Modifier.padding(bottom = 12.dp),
+            )
+
             for (request in viewModel.requests) {
                 SectionCard(modifier = Modifier.padding(bottom = 12.dp)) {
                     Text(
@@ -185,4 +186,5 @@ fun PlafondUpgradeScreen(
         OutlineButton(text = "Back", onClick = onBack, modifier = Modifier.fillMaxWidth())
         Spacer(Modifier.height(32.dp))
     }
+  }
 }

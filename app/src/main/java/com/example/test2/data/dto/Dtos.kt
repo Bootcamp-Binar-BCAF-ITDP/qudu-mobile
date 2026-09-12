@@ -19,10 +19,8 @@ data class PageEnvelope<T>(
     val empty: Boolean = true,
 )
 
-// ---------- auth ----------
 data class RegisterRequestDto(
     val accountType: String = "CUSTOMER",
-    /** Code from POST /api/auth/register/otp; the backend requires it for CUSTOMER. */
     val otp: String,
     val email: String,
     val password: String,
@@ -32,7 +30,6 @@ data class RegisterRequestDto(
     val address: String,
     val sex: String,
     val birthPlace: String,
-    /** yyyy-MM-dd */
     val birthDate: String,
     val occupation: String,
     val citizenship: String,
@@ -53,7 +50,6 @@ data class AuthResponseDto(
     val fullName: String? = null,
 )
 
-// ---------- loan ----------
 data class LoanApplicationCreateRequestDto(
     val customerId: String,
     val requestedAmount: BigDecimal,
@@ -147,7 +143,6 @@ data class LoanApplicationDto(
     val disbursement: LoanDisbursementDto? = null,
 )
 
-// ---------- plafond ----------
 data class PlafondDto(
     val plafondId: Int? = null,
     val level: Int? = null,
@@ -189,20 +184,17 @@ data class PlafondRequestDto(
     val requestedPlafond: PlafondDto? = null,
 )
 
-// ---------- push ----------
 data class DeviceTokenRequestDto(
     val token: String,
     val platform: String = "android",
 )
 
-// ---------- profile ----------
 data class CustomerDocumentDto(
     val documentId: Int? = null,
     val documentType: String? = null,
     val label: String? = null,
     val fileName: String? = null,
     val fileUrl: String? = null,
-    /** ISO-8601 LocalDateTime. */
     val uploadedAt: String? = null,
 )
 
@@ -225,9 +217,7 @@ data class CustomerProfileDto(
     val documents: List<CustomerDocumentDto> = emptyList(),
     val profileComplete: Boolean = false,
     val missingDocuments: List<String> = emptyList(),
-    /** Everything still missing before a submission is accepted - see CustomerProfileResponse. */
     val missingForSubmission: List<String> = emptyList(),
-    /** On file but too old; must be uploaded again before the next submission. */
     val staleForSubmission: List<String> = emptyList(),
     val submissionFreshnessDays: Int = 30,
     val readyToSubmit: Boolean = false,
@@ -235,10 +225,8 @@ data class CustomerProfileDto(
     fun documentOf(type: String): CustomerDocumentDto? =
         documents.firstOrNull { it.documentType == type }
 
-    /** Present but expired - the row shows "perlu diperbarui" rather than a tick. */
     fun isStale(type: String): Boolean = staleForSubmission.contains(type)
 
-    /** Blocks a submission: either never uploaded, or uploaded too long ago. */
     fun needsUpload(type: String): Boolean =
         missingForSubmission.contains(type) || isStale(type)
 }
@@ -249,7 +237,6 @@ data class ProfileUpdateRequestDto(
     val occupation: String,
 )
 
-// ---------- notifications ----------
 data class NotificationDto(
     val notificationId: Long? = null,
     val type: String? = null,
@@ -264,7 +251,6 @@ data class UnreadCountDto(
     val unread: Long = 0,
 )
 
-// ---------- password reset ----------
 
 data class ForgotPasswordRequestDto(
     val email: String,
