@@ -45,7 +45,7 @@ import com.example.test2.ui.common.CachedDataNotice
 import com.example.test2.ui.common.EmptyState
 import com.example.test2.ui.common.ErrorText
 import com.example.test2.ui.common.RefreshableScreen
-import com.example.test2.ui.common.SignInPrompt
+import com.example.test2.ui.common.SignedOutCard
 import com.example.test2.ui.loans.ApplicationsViewModel
 
 private enum class HistoryFilter(val label: String) {
@@ -66,17 +66,10 @@ fun HistoryScreen(
     LaunchedEffect(signedIn) { if (signedIn) viewModel.refresh() }
 
     if (!signedIn) {
-        SignInPrompt(
-            title = "Sign in to see your history",
-            message = "Every application and limit increase you have made is kept " +
-                "here, together with its decision.",
-            points = listOf(
-                "The full history of your loan applications and their status",
-                "Limit increase requests and the branch manager decision",
-                "The full reason whenever an application is rejected",
-            ),
+        SignedOutCard(
+            title = "Sign in to see history",
+            message = "Every application and limit increase you have made is kept ",
             onLogin = onLogin,
-            onRegister = onRegister,
             modifier = modifier,
         )
         return

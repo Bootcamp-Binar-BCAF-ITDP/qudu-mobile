@@ -1,6 +1,7 @@
 package com.example.test2.ui.profile
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,7 +39,9 @@ import androidx.compose.ui.unit.sp
 import com.example.test2.core.DocumentTypes
 import com.example.test2.core.asRupiah
 import com.example.test2.ui.apply.AppTextField
+import com.example.test2.ui.apply.CardBg
 import com.example.test2.ui.apply.CardBorder
+import com.example.test2.ui.apply.CardShape
 import com.example.test2.ui.apply.Danger
 import com.example.test2.ui.apply.DangerBg
 import com.example.test2.ui.apply.FieldLabel
@@ -55,7 +58,7 @@ import com.example.test2.ui.auth.MessageArea
 import com.example.test2.ui.common.CachedDataNotice
 import com.example.test2.ui.common.RefreshableScreen
 import com.example.test2.ui.common.SectionTitle
-import com.example.test2.ui.common.SignInPrompt
+import com.example.test2.ui.common.SignedOutCard
 import com.example.test2.ui.common.rememberDocumentCapture
 
 @Composable
@@ -78,17 +81,10 @@ fun ProfileScreen(
     LaunchedEffect(signedIn) { if (signedIn) viewModel.refresh() }
 
     if (!signedIn) {
-        SignInPrompt(
-            title = "Sign in to manage your profile",
-            message = "Your personal details and identity documents live here - upload " +
-                    "them once and every application reuses them automatically.",
-            points = listOf(
-                "Store your ID card, family card and selfie just once",
-                "Keep your phone number, address and occupation up to date",
-                "See the plafond limit you currently hold",
-            ),
+        SignedOutCard(
+            title = "Sign in to see profile",
+            message = "Your personal details, contact information and identity",
             onLogin = onLogin,
-            onRegister = onRegister,
             modifier = modifier,
         )
         return
@@ -286,6 +282,7 @@ fun ProfileScreen(
     }
   }
 }
+
 
 @Composable
 private fun IdentityHeader(name: String, email: String) {

@@ -20,11 +20,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.test2.core.LoanTier
+import com.example.test2.ui.apply.AppTextField
 import com.example.test2.ui.apply.CardBorder
+import com.example.test2.ui.apply.Danger
+import com.example.test2.ui.apply.FieldLabel
 import com.example.test2.ui.apply.Green
 import com.example.test2.ui.apply.Highlight
 import com.example.test2.ui.apply.SectionCard
@@ -48,6 +52,7 @@ fun SimulatorPanel(
     showTierRail: Boolean = true,
 ) {
     val tier = viewModel.tier
+    val valid = viewModel.inputsValid
 
     Column(modifier = modifier.fillMaxWidth()) {
 
@@ -60,7 +65,7 @@ fun SimulatorPanel(
             Spacer(Modifier.height(16.dp))
         }
 
-        TenorField(viewModel, tier)
+        TenorField(viewModel)
 
         Spacer(Modifier.height(18.dp))
 
@@ -75,7 +80,7 @@ fun SimulatorPanel(
             Spacer(Modifier.height(6.dp))
             Row(verticalAlignment = Alignment.Bottom) {
                 Text(
-                    text = formatRupiah(viewModel.monthlyInstalment),
+                    text = if (valid) formatRupiah(viewModel.monthlyInstalment) else "-",
                     fontSize = 26.sp,
                     fontWeight = FontWeight.Bold,
                     color = Green,
@@ -94,14 +99,20 @@ fun SimulatorPanel(
 
         SummaryRow(
             label = "Interest rate",
-            value = "${tier?.rateLabel ?: "-"} p.a.",
+            value = if (tier != null) "${tier.rateLabel} p.a." else "-",
             leadingDot = true,
         )
-        SummaryRow(label = "Admin fee (one-off)", value = formatRupiah(viewModel.adminFee))
-        SummaryRow(label = "Total repayment", value = formatRupiah(viewModel.totalRepayment))
+        SummaryRow(
+            label = "Admin fee (one-off)",
+            value = if (tier != null) formatRupiah(viewModel.adminFee) else "-",
+        )
+        SummaryRow(
+            label = "Total repayment",
+            value = if (valid) formatRupiah(viewModel.totalRepayment) else "-",
+        )
         SummaryRow(
             label = "Total cost of credit",
-            value = formatRupiah(viewModel.totalCost),
+            value = if (valid) formatRupiah(viewModel.totalCost) else "-",
             bold = true,
         )
 
@@ -135,34 +146,84 @@ fun SimulatorPanel(
 @Composable
 private fun AmountField(viewModel: SimulatorViewModel) {
 
-    val millions = (viewModel.amount / 1_000_000L).toInt()
-    val minMillions = (viewModel.minAmount / 1_000_000L).coerceAtLeast(1L).toInt()
-    val maxMillions = (viewModel.maxAmount / 1_000_000L).toInt()
+    val minAmount = viewModel.minAmount
+    val maxAmount = viewModel.maxAmount
+    val minMillions = (minAmount / 1_000_000L).coerceAtLeast(1L).toInt()
+    val maxMillions = (maxAmount / 1_000_000L).toInt()
 
-    ValueHeader("Loan Amount", formatRupiah(viewModel.amount))
-    Slider(
-        value = millions.toFloat(),
-        onValueChange = { viewModel.updateAmount(it.roundToInt() * 1_000_000L) },
-        valueRange = minMillions.toFloat()..maxMillions.toFloat(),
-        colors = simulatorSliderColors(),
+    FieldLabel("Loan Amount")
+    AppTextField(
+        value = if (viewModel.amount == 0L) "" else formatRupiah(viewModel.amount, withPrefix = false),
+        onValueChange = { input ->
+            val digits = input.filter(Char::isDigit).take(12)
+            viewModel.updateAmount(digits.toLongOrNull() ?: 0L)
+        },
+        placeholder = "0",
+        leadingText = "Rp",
+        keyboardType = KeyboardType.Number,
+        isError = !viewModel.amountInRange,
     )
-    RangeLabels(formatRupiah(viewModel.minAmount), formatRupiah(viewModel.maxAmount))
+
+    if (maxMillions > minMillions) {
+        Spacer(Modifier.height(4.dp))
+        Slider(
+            value = (viewModel.amount.coerceIn(minAmount, maxAmount) / 1_000_000L).toFloat(),
+            onValueChange = { viewModel.updateAmount(it.roundToInt() * 1_000_000L) },
+            valueRange = minMillions.toFloat()..maxMillions.toFloat(),
+            colors = simulatorSliderColors(),
+        )
+        RangeLabels(formatRupiah(minAmount), formatRupiah(maxAmount))
+    }
+
+    if (!viewModel.amountInRange) {
+        Spacer(Modifier.height(6.dp))
+        Text(
+            text = "Enter an amount between ${formatRupiah(minAmount)} and " +
+                "${formatRupiah(maxAmount)}.",
+            fontSize = 12.sp,
+            color = Danger,
+        )
+    }
 }
 
 @Composable
-private fun TenorField(viewModel: SimulatorViewModel, tier: LoanTier?) {
+private fun TenorField(viewModel: SimulatorViewModel) {
 
-    val minTenor = tier?.minTenor ?: 1
-    val maxTenor = tier?.maxTenor ?: 12
+    val minTenor = viewModel.minTenor
+    val maxTenor = viewModel.maxTenor
 
-    ValueHeader("Tenure", "${viewModel.tenor} months")
-    Slider(
-        value = viewModel.tenor.toFloat(),
-        onValueChange = { viewModel.updateTenor(it.roundToInt()) },
-        valueRange = minTenor.toFloat()..maxTenor.toFloat(),
-        colors = simulatorSliderColors(),
+    FieldLabel("Tenure")
+    AppTextField(
+        value = if (viewModel.tenor == 0) "" else viewModel.tenor.toString(),
+        onValueChange = { input ->
+            val digits = input.filter(Char::isDigit).take(3)
+            viewModel.updateTenor(digits.toIntOrNull() ?: 0)
+        },
+        placeholder = "0",
+        trailingText = "months",
+        keyboardType = KeyboardType.Number,
+        isError = viewModel.amountInRange && !viewModel.tenorInRange,
     )
-    RangeLabels("$minTenor months", "$maxTenor months")
+
+    if (maxTenor > minTenor) {
+        Spacer(Modifier.height(4.dp))
+        Slider(
+            value = viewModel.tenor.coerceIn(minTenor, maxTenor).toFloat(),
+            onValueChange = { viewModel.updateTenor(it.roundToInt()) },
+            valueRange = minTenor.toFloat()..maxTenor.toFloat(),
+            colors = simulatorSliderColors(),
+        )
+        RangeLabels("$minTenor months", "$maxTenor months")
+    }
+
+    if (viewModel.amountInRange && !viewModel.tenorInRange) {
+        Spacer(Modifier.height(6.dp))
+        Text(
+            text = "Choose a tenure between $minTenor and $maxTenor months.",
+            fontSize = 12.sp,
+            color = Danger,
+        )
+    }
 }
 
 @Composable
@@ -276,18 +337,6 @@ private fun TierRow(tier: LoanTier, highlighted: Boolean) {
             fontSize = 12.sp,
             color = TextMuted,
         )
-    }
-}
-
-@Composable
-private fun ValueHeader(label: String, value: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(label, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = TextPrimary)
-        Spacer(Modifier.weight(1f))
-        Text(value, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Green)
     }
 }
 

@@ -57,7 +57,7 @@ fun PlafondUpgradeScreen(
             .verticalScroll(rememberScrollState())
             .padding(24.dp),
     ) {
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(14.dp))
 
         Text(
             text = "Limit Increase",
@@ -65,13 +65,8 @@ fun PlafondUpgradeScreen(
             fontWeight = FontWeight.Bold,
             color = TextPrimary,
         )
-        Text(
-            text = "Tell us the amount you need. The system picks the plafond level " +
-                "that covers it, and the branch manager decides.",
-            fontSize = 14.sp,
-            color = TextSecondary,
-            modifier = Modifier.padding(top = 6.dp, bottom = 20.dp),
-        )
+
+        Spacer(Modifier.height(14.dp))
 
         SectionCard {
             FieldLabel("Amount you want")

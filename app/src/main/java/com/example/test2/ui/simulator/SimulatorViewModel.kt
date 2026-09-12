@@ -42,6 +42,13 @@ class SimulatorViewModel(
     val minAmount: Long get() = tiers.floorAmount()
     val maxAmount: Long get() = tiers.ceilingAmount()
 
+    val minTenor: Int get() = tier?.minTenor ?: 1
+    val maxTenor: Int get() = tier?.maxTenor ?: 12
+
+    val amountInRange: Boolean get() = amount in minAmount..maxAmount
+    val tenorInRange: Boolean get() = tier != null && tenor in minTenor..maxTenor
+    val inputsValid: Boolean get() = amountInRange && tenorInRange
+
     val monthlyInstalment: Long
         get() = monthlyInstalmentFor(amount, tenor, tier?.annualRate ?: 0.0)
 
@@ -64,7 +71,7 @@ class SimulatorViewModel(
                 val catalog = repository.load()
                 tiers = catalog.tiers
                 live = catalog.live
-                updateAmount(amount)
+                snapIntoRange()
             } finally {
                 isLoading = false
                 isRefreshing = false
@@ -73,11 +80,16 @@ class SimulatorViewModel(
     }
 
     fun updateAmount(value: Long) {
-        amount = value.coerceIn(minAmount, maxAmount)
+        amount = value.coerceAtLeast(0L)
         tier?.let { tenor = it.clampTenor(tenor) }
     }
 
     fun updateTenor(value: Int) {
-        tenor = tier?.clampTenor(value) ?: value
+        tenor = value.coerceAtLeast(0)
+    }
+
+    private fun snapIntoRange() {
+        amount = amount.coerceIn(minAmount, maxAmount)
+        tier?.let { tenor = it.clampTenor(tenor) }
     }
 }
