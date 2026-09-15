@@ -9,6 +9,7 @@ import com.example.test2.data.remote.ApiService
 import com.example.test2.data.dto.DeviceTokenRequestDto
 import com.example.test2.data.dto.ForgotPasswordRequestDto
 import com.example.test2.data.dto.LoginRequestDto
+import com.example.test2.data.dto.RefreshTokenRequestDto
 import com.example.test2.data.dto.RegisterRequestDto
 import com.example.test2.data.dto.RegistrationOtpRequestDto
 import com.example.test2.data.dto.ResetPasswordRequestDto
@@ -83,6 +84,7 @@ class AuthRepository(
                     customerId = dto.userId,
                     fullName = dto.fullName.orEmpty(),
                     email = dto.email ?: email,
+                    refreshToken = dto.refreshToken.orEmpty(),
                 )
 
                 sessionStore.save(session)
@@ -100,6 +102,15 @@ class AuthRepository(
             api.removeDeviceToken(token)
         } catch (e: Exception) {
         }
+
+        val refreshToken = sessionStore.refreshTokenOnce()
+        if (!refreshToken.isNullOrBlank()) {
+            try {
+                api.logout(RefreshTokenRequestDto(refreshToken))
+            } catch (e: Exception) {
+            }
+        }
+
         sessionStore.clear()
 
         loanCache.clear()

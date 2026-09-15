@@ -17,6 +17,7 @@ import com.example.test2.data.dto.PlafondDto
 import com.example.test2.data.dto.PlafondRequestDto
 import com.example.test2.data.dto.PlafondUpgradeRequestDto
 import com.example.test2.data.dto.ProfileUpdateRequestDto
+import com.example.test2.data.dto.RefreshTokenRequestDto
 import com.example.test2.data.dto.RegisterRequestDto
 import com.example.test2.data.dto.RegistrationOtpRequestDto
 import com.example.test2.data.dto.ResetPasswordRequestDto
@@ -32,6 +33,9 @@ interface ApiService {
 
     @POST("api/auth/login")
     suspend fun login(@Body body: LoginRequestDto): Response<AuthResponseDto>
+
+    @POST("api/auth/logout")
+    suspend fun logout(@Body body: RefreshTokenRequestDto): Response<ApiEnvelope<Unit>>
 
     @POST("api/auth/register/otp")
     suspend fun requestRegistrationOtp(

@@ -39,6 +39,8 @@ import com.example.test2.ui.profile.ProfileViewModel
 import com.example.test2.ui.simulator.SimulatorViewModel
 import kotlinx.coroutines.launch
 
+private const val SESSION_EXPIRED = "Your session has expired. Please sign in again."
+
 @Composable
 fun MainScaffold(modifier: Modifier = Modifier) {
 
@@ -113,8 +115,12 @@ fun MainScaffold(modifier: Modifier = Modifier) {
 
             scope.launch { container.authRepository.syncDeviceToken() }
         } else {
+            // Only someone who was actually inside a signed-in screen gets sent
+            // to Login. A guest browsing Home or the simulator has not lost a
+            // session and must not be interrupted.
             if (AppRoute.requiresAuth(currentRoute)) {
-                goTo(activeTab.destination)
+                goTo(AppRoute.Login)
+                scope.launch { snackbarHostState.showSnackbar(SESSION_EXPIRED) }
             }
             profilePromptShown = false
         }

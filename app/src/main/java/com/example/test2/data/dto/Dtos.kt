@@ -43,11 +43,17 @@ data class LoginRequestDto(
 
 data class AuthResponseDto(
     val token: String? = null,
+    val refreshToken: String? = null,
+    val expiresIn: Long? = null,
     val userId: String? = null,
     val username: String? = null,
     val role: String? = null,
     val email: String? = null,
     val fullName: String? = null,
+)
+
+data class RefreshTokenRequestDto(
+    val refreshToken: String,
 )
 
 data class LoanApplicationCreateRequestDto(
