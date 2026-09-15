@@ -21,7 +21,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "BASE_URL", "\"http://192.168.0.112:8080/\"")
+        buildConfigField("String", "BASE_URL", "\"https://api.profilku.site/\"")
     }
 
     buildTypes {

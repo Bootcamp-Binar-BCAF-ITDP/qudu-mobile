@@ -28,6 +28,8 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -297,16 +299,20 @@ internal fun AppTextField(
     leadingText: String? = null,
     trailingIcon: ImageVector? = null,
     trailingText: String? = null,
+    onTrailingIconClick: (() -> Unit)? = null,
     keyboardType: KeyboardType = KeyboardType.Text,
     isPassword: Boolean = false,
     isError: Boolean = false,
     modifier: Modifier = Modifier
 ) {
+    var revealed by remember { mutableStateOf(false) }
+    val masked = isPassword && !revealed
+
     BasicTextField(
         value = value,
         onValueChange = onValueChange,
         singleLine = true,
-        visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
+        visualTransformation = if (masked) PasswordVisualTransformation() else VisualTransformation.None,
         textStyle = LocalTextStyle.current.copy(fontSize = 15.sp, color = TextPrimary),
         cursorBrush = SolidColor(Green),
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
@@ -317,7 +323,11 @@ internal fun AppTextField(
                     .fillMaxWidth()
                     .clip(FieldShape)
                     .background(FieldBg)
-                    .border(if (isError) 1.5.dp else 1.dp, if (isError) Danger else FieldBorder, FieldShape)
+                    .border(
+                        if (isError) 1.5.dp else 1.dp,
+                        if (isError) Danger else FieldBorder,
+                        FieldShape
+                    )
                     .padding(horizontal = 14.dp, vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -339,9 +349,23 @@ internal fun AppTextField(
                     Spacer(Modifier.width(8.dp))
                     Text(trailingText, fontSize = 15.sp, color = TextSecondary)
                 }
-                if (trailingIcon != null) {
+                if (isPassword) {
                     Spacer(Modifier.width(10.dp))
-                    Icon(trailingIcon, null, tint = TextMuted, modifier = Modifier.size(18.dp))
+                    Icon(
+                        imageVector = if (revealed) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                        contentDescription = if (revealed) "Hide password" else "Show password",
+                        tint = TextMuted,
+                        modifier = Modifier
+                            .size(18.dp)
+                            .clickable { revealed = !revealed }
+                    )
+                } else if (trailingIcon != null) {
+                    Spacer(Modifier.width(10.dp))
+                    Icon(trailingIcon, null, tint = TextMuted, modifier = Modifier.size(18.dp)
+                        .then(
+                            if (onTrailingIconClick != null) Modifier.clickable(onClick = onTrailingIconClick)
+                            else Modifier
+                        ))
                 }
             }
         }
@@ -367,7 +391,11 @@ internal fun <T> AppDropdownField(
                 .fillMaxWidth()
                 .clip(FieldShape)
                 .background(FieldBg)
-                .border(if (isError) 1.5.dp else 1.dp, if (isError) Danger else FieldBorder, FieldShape)
+                .border(
+                    if (isError) 1.5.dp else 1.dp,
+                    if (isError) Danger else FieldBorder,
+                    FieldShape
+                )
                 .clickable { expanded = true }
                 .padding(horizontal = 14.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
