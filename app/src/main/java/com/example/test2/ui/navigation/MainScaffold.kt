@@ -3,7 +3,11 @@ package com.example.test2.ui.navigation
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -41,6 +45,7 @@ import kotlinx.coroutines.launch
 
 private const val SESSION_EXPIRED = "Your session has expired. Please sign in again."
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun MainScaffold(modifier: Modifier = Modifier) {
 
@@ -158,10 +163,13 @@ fun MainScaffold(modifier: Modifier = Modifier) {
         }
     }
 
+    val imeVisible = WindowInsets.isImeVisible
+
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(ScreenBg)
+            .imePadding()
     ) {
 
         val showChrome = AppRoute.showsChrome(currentRoute)
@@ -205,7 +213,7 @@ fun MainScaffold(modifier: Modifier = Modifier) {
                 )
             }
 
-            if (showChrome) {
+            if (showChrome && !imeVisible) {
                 QuDuBottomBar(
                     selected = activeTab,
                     onSelect = { destination -> goTo(destination.destination) },
