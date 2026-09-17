@@ -23,16 +23,21 @@ fun rememberDocumentCapture(onCaptured: (documentType: String, uri: Uri) -> Unit
     var pendingType by remember { mutableStateOf<String?>(null) }
     var pendingCaptureUri by remember { mutableStateOf<Uri?>(null) }
 
+    var previewType by remember { mutableStateOf<String?>(null) }
+    var previewUri by remember { mutableStateOf<Uri?>(null) }
+    var previewFromCamera by remember { mutableStateOf(true) }
+
     val pickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
     ) { uri ->
         val type = pendingType
         pendingType = null
-        if (uri != null && type != null) onCaptured(type, uri)
+        if (uri != null && type != null) {
+            previewType = type
+            previewUri = uri
+            previewFromCamera = false
+        }
     }
-
-    var previewType by remember { mutableStateOf<String?>(null) }
-    var previewUri by remember { mutableStateOf<Uri?>(null) }
 
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture(),
@@ -44,6 +49,7 @@ fun rememberDocumentCapture(onCaptured: (documentType: String, uri: Uri) -> Unit
         if (success && uri != null && type != null) {
             previewType = type
             previewUri = uri
+            previewFromCamera = true
         }
     }
 
@@ -70,16 +76,23 @@ fun rememberDocumentCapture(onCaptured: (documentType: String, uri: Uri) -> Unit
         PhotoPreviewDialog(
             uri = confirmingUri,
             title = DocumentTypes.label(confirmingType),
+            fromCamera = previewFromCamera,
+            isSelfie = confirmingType == DocumentTypes.SELFIE,
+            fileName = if (previewFromCamera) null else confirmingUri.lastPathSegment,
             onConfirm = {
                 previewType = null
                 previewUri = null
                 onCaptured(confirmingType, confirmingUri)
             },
             onRetake = {
+                val retryType = confirmingType
+                val cameraAgain = previewFromCamera
+
                 previewUri = null
                 previewType = null
-                pendingType = confirmingType
-                launchCamera()
+                pendingType = retryType
+
+                if (cameraAgain) launchCamera() else pickerLauncher.launch("*/*")
             },
             onDismiss = {
                 previewType = null

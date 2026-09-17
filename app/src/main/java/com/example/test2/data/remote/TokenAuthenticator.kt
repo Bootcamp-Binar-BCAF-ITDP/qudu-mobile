@@ -2,7 +2,7 @@ package com.example.test2.data.remote
 
 import com.example.test2.data.dto.AuthResponseDto
 import com.example.test2.data.dto.RefreshTokenRequestDto
-import com.example.test2.data.local.SessionStore
+import com.example.test2.data.local.TokenStore
 import kotlinx.coroutines.runBlocking
 import okhttp3.Authenticator
 import okhttp3.Request
@@ -28,7 +28,7 @@ interface RefreshApi {
  * The customer sees nothing: the screen that was loading simply loads.
  */
 class TokenAuthenticator(
-    private val sessionStore: SessionStore,
+    private val sessionStore: TokenStore,
     private val refreshApi: RefreshApi,
 ) : Authenticator {
 

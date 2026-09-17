@@ -32,5 +32,5 @@ object DocumentTypes {
         else -> "Tap to upload"
     }
 
-    fun isCameraCapture(type: String): Boolean = type == SELFIE
+    fun isCameraCapture(type: String): Boolean = type == SELFIE || type == KTP
 }

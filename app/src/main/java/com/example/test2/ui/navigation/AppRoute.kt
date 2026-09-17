@@ -69,6 +69,13 @@ sealed interface AppRoute {
         fun requiresAuth(route: String?): Boolean =
             requiringAuth.any { it.route == route }
 
+        val chromeless: Set<AppRoute> = setOf(
+            Login, Register, ForgotPassword, ApplyLoan,
+        )
+
+        fun showsChrome(route: String?): Boolean =
+            chromeless.none { it.route == route }
+
         fun of(route: String?): AppRoute? = entries.firstOrNull { it.route == route }
     }
 }

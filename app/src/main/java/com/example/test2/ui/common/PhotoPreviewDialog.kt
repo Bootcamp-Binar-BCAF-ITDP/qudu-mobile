@@ -13,8 +13,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -45,6 +49,12 @@ import com.example.test2.ui.apply.TextSecondary
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+private sealed interface PreviewContent {
+    data object Loading : PreviewContent
+    data class Picture(val bitmap: Bitmap) : PreviewContent
+    data object NotAnImage : PreviewContent
+}
+
 @Composable
 fun PhotoPreviewDialog(
     uri: Uri,
@@ -52,20 +62,39 @@ fun PhotoPreviewDialog(
     onConfirm: () -> Unit,
     onRetake: () -> Unit,
     onDismiss: () -> Unit,
+    fromCamera: Boolean = true,
+    isSelfie: Boolean = false,
+    fileName: String? = null,
 ) {
     val context = LocalContext.current
 
-    val bitmap: Bitmap? by produceState<Bitmap?>(initialValue = null, uri) {
-        value = withContext(Dispatchers.IO) {
-            ImageCompressor.decodeUpright(
-                contentResolver = context.contentResolver,
-                uri = uri,
-                maxDimension = UploadRules.MAX_IMAGE_DIMENSION,
-            )
+    val content: PreviewContent by produceState<PreviewContent>(PreviewContent.Loading, uri) {
+        val decoded = withContext(Dispatchers.IO) {
+            try {
+                ImageCompressor.decodeUpright(
+                    contentResolver = context.contentResolver,
+                    uri = uri,
+                    maxDimension = UploadRules.MAX_IMAGE_DIMENSION,
+                )
+            } catch (e: Exception) {
+                null
+            } catch (e: OutOfMemoryError) {
+                null
+            }
         }
+
+        value = if (decoded == null) PreviewContent.NotAnImage else PreviewContent.Picture(decoded)
     }
 
-    val decoding = bitmap == null
+    val guidance = when {
+        isSelfie -> "Check the photo before you send it. Your face should be clear, " +
+            "sharp and fully in frame."
+
+        fromCamera -> "Check the photo before you send it. Every corner of the document " +
+            "should be readable."
+
+        else -> "Check the file before you send it."
+    }
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -86,8 +115,7 @@ fun PhotoPreviewDialog(
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                text = "Check the photo before you send it. Your face should be " +
-                    "clear, sharp and fully in frame.",
+                text = guidance,
                 fontSize = 13.sp,
                 color = TextSecondary,
             )
@@ -101,16 +129,15 @@ fun PhotoPreviewDialog(
                     .background(Highlight),
                 contentAlignment = Alignment.Center,
             ) {
-                val shot = bitmap
-                when {
-                    shot != null -> Image(
-                        bitmap = shot.asImageBitmap(),
-                        contentDescription = "The photo you just took",
+                when (val shown = content) {
+                    is PreviewContent.Picture -> Image(
+                        bitmap = shown.bitmap.asImageBitmap(),
+                        contentDescription = "Preview of $title",
                         contentScale = ContentScale.Fit,
                         modifier = Modifier.fillMaxSize(),
                     )
 
-                    else -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    PreviewContent.Loading -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         CircularProgressIndicator(color = Green)
                         Spacer(Modifier.height(12.dp))
                         Text(
@@ -119,12 +146,39 @@ fun PhotoPreviewDialog(
                             color = TextSecondary,
                         )
                     }
+
+                    PreviewContent.NotAnImage -> Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.padding(24.dp),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.List,
+                            contentDescription = null,
+                            tint = TextMuted,
+                            modifier = Modifier.size(44.dp),
+                        )
+                        Spacer(Modifier.height(12.dp))
+                        Text(
+                            text = fileName ?: "The selected file",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = TextPrimary,
+                            textAlign = TextAlign.Center,
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            text = "This file cannot be shown here, but it will be sent as it is.",
+                            fontSize = 13.sp,
+                            color = TextSecondary,
+                            textAlign = TextAlign.Center,
+                        )
+                    }
                 }
             }
 
             Spacer(Modifier.height(18.dp))
             PrimaryButton(
-                text = "Use This Photo",
+                text = if (content is PreviewContent.Picture) "Use This Photo" else "Use This File",
                 onClick = onConfirm,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -132,7 +186,7 @@ fun PhotoPreviewDialog(
             Spacer(Modifier.height(10.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 OutlineButton(
-                    text = "Retake",
+                    text = if (fromCamera) "Retake" else "Choose Another",
                     onClick = onRetake,
                     modifier = Modifier.weight(1f),
                 )
@@ -145,7 +199,7 @@ fun PhotoPreviewDialog(
                 )
             }
 
-            if (!decoding) {
+            if (content is PreviewContent.Picture) {
                 Spacer(Modifier.height(10.dp))
                 Text(
                     text = "The photo is resized before it is sent.",

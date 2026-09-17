@@ -18,7 +18,7 @@ data class Session(
     val refreshToken: String = "",
 )
 
-class SessionStore(private val context: Context) {
+class SessionStore(private val context: Context) : TokenStore {
 
     private object Keys {
         val TOKEN = stringPreferencesKey("token")
@@ -63,7 +63,7 @@ class SessionStore(private val context: Context) {
      * mean reading it back first, and a blank name would quietly overwrite a
      * real one.
      */
-    suspend fun updateTokens(token: String, refreshToken: String?) {
+    override suspend fun updateTokens(token: String, refreshToken: String?) {
         context.dataStore.edit { prefs ->
             prefs[Keys.TOKEN] = token
             if (!refreshToken.isNullOrBlank()) {
@@ -72,14 +72,14 @@ class SessionStore(private val context: Context) {
         }
     }
 
-    suspend fun clear() {
+    override suspend fun clear() {
         context.dataStore.edit { it.clear() }
     }
 
     suspend fun sessionOnce(): Session? = session.first()
 
-    suspend fun tokenOnce(): String? = context.dataStore.data.first()[Keys.TOKEN]
+    override suspend fun tokenOnce(): String? = context.dataStore.data.first()[Keys.TOKEN]
 
-    suspend fun refreshTokenOnce(): String? =
+    override suspend fun refreshTokenOnce(): String? =
         context.dataStore.data.first()[Keys.REFRESH_TOKEN]
 }

@@ -164,14 +164,18 @@ fun MainScaffold(modifier: Modifier = Modifier) {
             .background(ScreenBg)
     ) {
 
+        val showChrome = AppRoute.showsChrome(currentRoute)
+
         Column(Modifier.fillMaxSize()) {
 
-            QuDuTopBar(
-                unreadCount = notificationsViewModel.unread,
-                showActions = signedIn,
-                onNotifications = { navigate(AppRoute.Notifications) },
-                onProfile = { goTo(AppRoute.Profile) },
-            )
+            if (showChrome) {
+                QuDuTopBar(
+                    unreadCount = notificationsViewModel.unread,
+                    showActions = signedIn,
+                    onNotifications = { navigate(AppRoute.Notifications) },
+                    onProfile = { goTo(AppRoute.Profile) },
+                )
+            }
             Box(
                 Modifier
                     .weight(1f)
@@ -201,10 +205,12 @@ fun MainScaffold(modifier: Modifier = Modifier) {
                 )
             }
 
-            QuDuBottomBar(
-                selected = activeTab,
-                onSelect = { destination -> goTo(destination.destination) },
-            )
+            if (showChrome) {
+                QuDuBottomBar(
+                    selected = activeTab,
+                    onSelect = { destination -> goTo(destination.destination) },
+                )
+            }
         }
 
         LaunchedEffect(applyViewModel.error) {
