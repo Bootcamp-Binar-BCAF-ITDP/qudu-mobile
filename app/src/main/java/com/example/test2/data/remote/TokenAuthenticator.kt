@@ -18,15 +18,6 @@ interface RefreshApi {
     fun refresh(@Body body: RefreshTokenRequestDto): Call<AuthResponseDto>
 }
 
-/**
- * Renews an expired access token and replays the request that hit 401.
- *
- * An OkHttp Authenticator rather than an Interceptor, because OkHttp only calls
- * this on a 401 and hands back the original request to retry. Doing it in an
- * interceptor would mean rebuilding that retry by hand.
- *
- * The customer sees nothing: the screen that was loading simply loads.
- */
 class TokenAuthenticator(
     private val sessionStore: TokenStore,
     private val refreshApi: RefreshApi,
@@ -36,12 +27,6 @@ class TokenAuthenticator(
 
     override fun authenticate(route: Route?, response: Response): Request? {
 
-        // Already retried once with a fresh token and still 401. Renewing again
-        // would loop, so let the failure through.
-        if (priorResponseCount(response) >= 1) return null
-
-        // Sign-in and refresh answer 401 for a wrong password or a dead refresh
-        // token. Those are real answers, not expiry, and must not be retried.
         if (response.request.url.encodedPath.contains("/api/auth/")) return null
 
         val failedToken = response.request.header("Authorization")
@@ -52,8 +37,6 @@ class TokenAuthenticator(
 
             val current = runBlocking { sessionStore.tokenOnce() }
 
-            // Another request refreshed while this one waited on the lock.
-            // Reuse that result instead of burning a second refresh token.
             if (!current.isNullOrBlank() && current != failedToken) {
                 return response.request.signedWith(current)
             }
@@ -67,8 +50,6 @@ class TokenAuthenticator(
             val refreshed = try {
                 refreshApi.refresh(RefreshTokenRequestDto(refreshToken)).execute()
             } catch (e: IOException) {
-                // Offline, not expired. Failing the call is right; ending the
-                // session here would sign the customer out for losing signal.
                 return null
             }
 
@@ -86,11 +67,6 @@ class TokenAuthenticator(
         }
     }
 
-    /**
-     * Clearing the store is the whole signal. The session Flow emits null, the
-     * shell observes it and sends the customer to Login, so no extra callback
-     * is needed and there is only one path out of a session.
-     */
     private fun endSession() {
         runBlocking { sessionStore.clear() }
     }

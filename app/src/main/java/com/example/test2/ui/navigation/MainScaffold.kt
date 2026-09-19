@@ -120,9 +120,6 @@ fun MainScaffold(modifier: Modifier = Modifier) {
 
             scope.launch { container.authRepository.syncDeviceToken() }
         } else {
-            // Only someone who was actually inside a signed-in screen gets sent
-            // to Login. A guest browsing Home or the simulator has not lost a
-            // session and must not be interrupted.
             if (AppRoute.requiresAuth(currentRoute)) {
                 goTo(AppRoute.Login)
                 scope.launch { snackbarHostState.showSnackbar(SESSION_EXPIRED) }

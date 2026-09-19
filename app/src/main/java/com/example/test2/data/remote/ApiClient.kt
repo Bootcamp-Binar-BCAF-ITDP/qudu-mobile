@@ -12,14 +12,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 object ApiClient {
-
-    /**
-     * A second, deliberately bare client for the refresh call alone.
-     *
-     * It carries no auth interceptor and no authenticator. If the refresh went
-     * through the main client, a 401 from refresh would trigger another
-     * refresh, and so on.
-     */
     private fun refreshApi(): RefreshApi =
         Retrofit.Builder()
             .baseUrl(BuildConfig.BASE_URL)
@@ -40,9 +32,6 @@ object ApiClient {
             val request = if (token.isNullOrBlank()) {
                 chain.request()
             } else {
-                // header(), not addHeader(). A request replayed by the
-                // authenticator already carries an Authorization header, and
-                // addHeader would append a second one rather than replace it.
                 chain.request().newBuilder()
                     .header("Authorization", "Bearer $token")
                     .build()
