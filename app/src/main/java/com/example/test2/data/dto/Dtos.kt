@@ -19,8 +19,16 @@ data class PageEnvelope<T>(
     val empty: Boolean = true,
 )
 
+data class BranchDto(
+    val branchId: Int,
+    val branchCode: String? = null,
+    val branchName: String? = null,
+    val location: String? = null,
+)
+
 data class RegisterRequestDto(
     val accountType: String = "CUSTOMER",
+    val branchId: Int?,
     val otp: String,
     val email: String,
     val password: String,

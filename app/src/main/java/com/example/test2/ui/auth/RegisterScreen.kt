@@ -36,6 +36,8 @@ fun RegisterScreen(
     var otpSent by remember { mutableStateOf(false) }
     var otp by remember { mutableStateOf("") }
 
+    LaunchedEffect(Unit) { viewModel.loadBranches() }
+
     if (otpSent) {
         RegistrationOtpStep(
             email = form.email.trim(),
@@ -85,6 +87,33 @@ fun RegisterScreen(
         )
 
         SectionCard {
+            // First field on purpose: the branch decides who handles every loan
+            // this customer ever files, so it is a choice, not a detail.
+            FieldLabel("Nearest branch")
+            AppDropdownField(
+                options = viewModel.branches,
+                selected = viewModel.branches.firstOrNull { it.branchId == form.branchId },
+                onSelect = { form = form.copy(branchId = it.branchId) },
+                placeholder = if (viewModel.branches.isEmpty()) {
+                    "Branches unavailable — check your connection"
+                } else {
+                    "Choose the branch nearest to you"
+                },
+                label = { branch ->
+                    listOfNotNull(branch.branchName, branch.location)
+                        .filter { it.isNotBlank() }
+                        .joinToString(" — ")
+                        .ifBlank { "Branch ${branch.branchId}" }
+                },
+            )
+            Text(
+                text = "Your applications go to this branch's team.",
+                fontSize = 12.sp,
+                color = TextSecondary,
+                modifier = Modifier.padding(top = 6.dp),
+            )
+            Spacer(Modifier.height(14.dp))
+
             LabelledField("Full Name", form.fullName, "As printed on your ID card") {
                 form = form.copy(fullName = it)
             }

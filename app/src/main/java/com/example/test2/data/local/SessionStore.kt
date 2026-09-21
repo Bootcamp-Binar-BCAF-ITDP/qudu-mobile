@@ -55,14 +55,6 @@ class SessionStore(private val context: Context) : TokenStore {
         }
     }
 
-    /**
-     * Writes the pair a refresh returned, leaving the identity fields alone.
-     *
-     * Separate from [save] because the authenticator runs on an OkHttp thread
-     * with only the two tokens in hand. Rewriting the whole session there would
-     * mean reading it back first, and a blank name would quietly overwrite a
-     * real one.
-     */
     override suspend fun updateTokens(token: String, refreshToken: String?) {
         context.dataStore.edit { prefs ->
             prefs[Keys.TOKEN] = token

@@ -2,6 +2,7 @@ package com.example.test2.data.remote
 
 import com.example.test2.data.dto.ApiEnvelope
 import com.example.test2.data.dto.AuthResponseDto
+import com.example.test2.data.dto.BranchDto
 import com.example.test2.data.dto.CustomerDocumentDto
 import com.example.test2.data.dto.CustomerPlafondDto
 import com.example.test2.data.dto.CustomerProfileDto
@@ -27,6 +28,11 @@ import retrofit2.Response
 import retrofit2.http.*
 
 interface ApiService {
+
+    // Public, like the plafond catalog: the sign-up form has to list branches
+    // before the customer has an account to authenticate with.
+    @GET("api/branches/options")
+    suspend fun branchOptions(): Response<ApiEnvelope<List<BranchDto>>>
 
     @POST("api/auth/register")
     suspend fun register(@Body body: RegisterRequestDto): Response<ApiEnvelope<Unit>>

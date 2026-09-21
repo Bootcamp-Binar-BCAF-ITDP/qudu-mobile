@@ -6,6 +6,7 @@ import com.example.test2.data.local.LoanCache
 import com.example.test2.data.local.ProfileCache
 import com.example.test2.data.local.SessionStore
 import com.example.test2.data.remote.ApiService
+import com.example.test2.data.dto.BranchDto
 import com.example.test2.data.dto.DeviceTokenRequestDto
 import com.example.test2.data.dto.ForgotPasswordRequestDto
 import com.example.test2.data.dto.LoginRequestDto
@@ -23,6 +24,12 @@ class AuthRepository(
 ) {
 
     val session = sessionStore.session
+
+    suspend fun branches(): Outcome<List<BranchDto>> =
+        when (val result = apiCall { api.branchOptions() }) {
+            is Outcome.Success -> Outcome.Success(result.value.data.orEmpty())
+            is Outcome.Failure -> result
+        }
 
     suspend fun register(body: RegisterRequestDto): Outcome<Unit> =
         when (val result = apiCall { api.register(body) }) {

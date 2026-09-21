@@ -229,3 +229,63 @@ class NotificationRepositoryTest {
         assertEquals(Outcome.Failure("Try later", 500), repository.markAllRead())
     }
 }
+
+/**
+ * The branch list feeds the sign-up form, before the customer has a token. It
+ * is checked at the API level because that is where it can break: a wrong path
+ * or a renamed field would leave the picker silently empty and block every new
+ * registration.
+ */
+class BranchOptionsApiTest {
+
+    private lateinit var server: MockWebServer
+    private lateinit var api: com.example.test2.data.remote.ApiService
+
+    @Before
+    fun setUp() {
+        server = MockWebServer().apply { start() }
+        api = server.apiService()
+    }
+
+    @After
+    fun tearDown() {
+        server.shutdown()
+    }
+
+    @Test
+    fun `it reads the public branch options endpoint`() = runTest {
+        server.respond(
+            200,
+            """{"data":[{"branchId":1,"branchCode":"BR-1","branchName":"Jakarta Pusat","location":"Jakarta"},""" +
+                """{"branchId":2,"branchName":"Bandung"}]}""",
+        )
+
+        val response = api.branchOptions()
+
+        assertEquals("/api/branches/options", server.takeRequest().path)
+        assertTrue(response.isSuccessful)
+
+        val branches = response.body()?.data.orEmpty()
+        assertEquals(listOf(1, 2), branches.map { it.branchId })
+        assertEquals("Jakarta Pusat", branches[0].branchName)
+        assertEquals("Jakarta", branches[0].location)
+    }
+
+    @Test
+    fun `a branch without a name or location still parses`() = runTest {
+        server.respond(200, """{"data":[{"branchId":9}]}""")
+
+        val branches = api.branchOptions().body()?.data.orEmpty()
+
+        assertEquals(1, branches.size)
+        assertEquals(9, branches[0].branchId)
+        assertEquals(null, branches[0].branchName)
+    }
+
+    @Test
+    fun `no data field reads as no branches, not a crash`() = runTest {
+        server.respond(200, """{"message":"ok"}""")
+
+        assertEquals(emptyList<Any>(), api.branchOptions().body()?.data.orEmpty())
+    }
+}

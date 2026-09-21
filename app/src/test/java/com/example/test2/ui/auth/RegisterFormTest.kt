@@ -7,6 +7,7 @@ import org.junit.Test
 class RegisterFormTest {
 
     private val valid = RegisterForm(
+        branchId = 3,
         fullName = "Budi Santoso",
         email = "budi@qudu.test",
         password = "secret1",
@@ -76,7 +77,20 @@ class RegisterFormTest {
 
     @Test
     fun `errors are reported one at a time, top of the form first`() {
-        assertEquals("Full name is required.", RegisterForm().firstError())
+        assertEquals("Please choose the branch nearest to you.", RegisterForm().firstError())
+    }
+
+    @Test
+    fun `a branch must be chosen before anything else is checked`() {
+        assertEquals(
+            "Please choose the branch nearest to you.",
+            valid.copy(branchId = null).firstError(),
+        )
+    }
+
+    @Test
+    fun `the request body carries the chosen branch`() {
+        assertEquals(3, valid.toDto("654321").branchId)
     }
 
     @Test

@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.test2.core.HTTP_ALREADY_REGISTERED
 import com.example.test2.core.Outcome
+import com.example.test2.data.dto.BranchDto
 import com.example.test2.data.dto.RegisterRequestDto
 import com.example.test2.data.repository.AuthRepository
 import kotlinx.coroutines.launch
@@ -27,6 +28,20 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
 
     var info by mutableStateOf<String?>(null)
         private set
+
+    var branches by mutableStateOf<List<BranchDto>>(emptyList())
+        private set
+
+    fun loadBranches() {
+        if (branches.isNotEmpty()) return
+
+        viewModelScope.launch {
+            when (val result = repository.branches()) {
+                is Outcome.Success -> branches = result.value
+                is Outcome.Failure -> Unit
+            }
+        }
+    }
 
     fun clearMessages() {
         error = null
@@ -172,6 +187,7 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
 }
 
 data class RegisterForm(
+    val branchId: Int? = null,
     val fullName: String = "",
     val email: String = "",
     val password: String = "",
@@ -186,6 +202,7 @@ data class RegisterForm(
 ) {
 
     fun firstError(): String? = when {
+        branchId == null -> "Please choose the branch nearest to you."
         fullName.isBlank() -> "Full name is required."
         email.isBlank() -> "Email is required."
         !email.contains("@") -> "That email address is not valid."
@@ -201,6 +218,7 @@ data class RegisterForm(
     }
 
     fun toDto(otp: String) = RegisterRequestDto(
+        branchId = branchId,
         otp = otp,
         email = email.trim(),
         password = password,
