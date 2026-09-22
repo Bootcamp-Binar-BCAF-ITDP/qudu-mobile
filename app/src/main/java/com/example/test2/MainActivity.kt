@@ -16,7 +16,9 @@ import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import com.example.test2.ui.QuickDuitApp
 import com.example.test2.ui.theme.Test2Theme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private val notificationPermissionLauncher = registerForActivityResult(

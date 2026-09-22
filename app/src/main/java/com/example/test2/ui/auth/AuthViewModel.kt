@@ -11,6 +11,8 @@ import com.example.test2.data.dto.BranchDto
 import com.example.test2.data.dto.RegisterRequestDto
 import com.example.test2.data.repository.AuthRepository
 import kotlinx.coroutines.launch
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
 const val RESET_CODE_LENGTH = 6
 
@@ -18,7 +20,8 @@ const val REGISTRATION_OTP_LENGTH = 6
 
 const val MIN_RESET_PASSWORD_LENGTH = 8
 
-class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
+@HiltViewModel
+class AuthViewModel @Inject constructor(private val repository: AuthRepository) : ViewModel() {
 
     var isBusy by mutableStateOf(false)
         private set

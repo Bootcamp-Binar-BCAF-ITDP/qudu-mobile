@@ -11,8 +11,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.test2.di.rememberViewModelFactory
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.test2.ui.apply.*
 import com.example.test2.core.DocumentTypes
 import com.example.test2.ui.auth.MessageArea
@@ -29,7 +28,7 @@ fun PlafondUpgradeScreen(
     onSubmitted: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val viewModel: PlafondViewModel = viewModel(factory = rememberViewModelFactory())
+    val viewModel: PlafondViewModel = hiltViewModel()
 
     var amount by remember { mutableStateOf("") }
 

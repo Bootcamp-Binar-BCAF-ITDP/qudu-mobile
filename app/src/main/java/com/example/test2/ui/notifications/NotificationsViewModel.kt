@@ -9,8 +9,11 @@ import com.example.test2.core.Outcome
 import com.example.test2.data.dto.NotificationDto
 import com.example.test2.data.repository.NotificationRepository
 import kotlinx.coroutines.launch
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class NotificationsViewModel(
+@HiltViewModel
+class NotificationsViewModel @Inject constructor(
     private val repository: NotificationRepository,
 ) : ViewModel() {
 

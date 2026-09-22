@@ -14,10 +14,13 @@ import com.example.test2.data.repository.LoanRepository
 import com.example.test2.data.repository.ProfileRepository
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
 private const val HTTP_PROFILE_INCOMPLETE = 409
 
-class ApplyViewModel(
+@HiltViewModel
+class ApplyViewModel @Inject constructor(
     private val repository: LoanRepository,
     private val profileRepository: ProfileRepository,
     private val sessionStore: SessionStore,

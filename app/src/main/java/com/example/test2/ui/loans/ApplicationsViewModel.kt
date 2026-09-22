@@ -17,8 +17,11 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class ApplicationsViewModel(
+@HiltViewModel
+class ApplicationsViewModel @Inject constructor(
     private val repository: LoanRepository,
     private val sessionStore: SessionStore,
 ) : ViewModel() {

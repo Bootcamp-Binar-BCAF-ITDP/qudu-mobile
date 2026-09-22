@@ -22,14 +22,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.test2.di.rememberAppContainer
-import com.example.test2.di.rememberViewModelFactory
+import com.example.test2.di.rememberAppEntryPoint
 import com.example.test2.ui.apply.ApplyViewModel
 import com.example.test2.ui.apply.ScreenBg
 import com.example.test2.ui.apply.rememberApplyLoanState
@@ -49,13 +48,12 @@ private const val SESSION_EXPIRED = "Your session has expired. Please sign in ag
 @Composable
 fun MainScaffold(modifier: Modifier = Modifier) {
 
-    val container = rememberAppContainer()
-    val factory = rememberViewModelFactory()
+    val app = rememberAppEntryPoint()
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val navController = rememberNavController()
 
-    val session by container.sessionStore.session.collectAsState(initial = null)
+    val session by app.sessionStore().session.collectAsState(initial = null)
     val signedIn = session != null
 
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -67,13 +65,13 @@ fun MainScaffold(modifier: Modifier = Modifier) {
 
     var profilePromptShown by rememberSaveable { mutableStateOf(false) }
 
-    val dashboardViewModel: DashboardViewModel = viewModel(factory = factory)
-    val applyViewModel: ApplyViewModel = viewModel(factory = factory)
-    val profileViewModel: ProfileViewModel = viewModel(factory = factory)
-    val applicationsViewModel: ApplicationsViewModel = viewModel(factory = factory)
-    val notificationsViewModel: NotificationsViewModel = viewModel(factory = factory)
-    val simulatorViewModel: SimulatorViewModel = viewModel(factory = factory)
-    val authViewModel: AuthViewModel = viewModel(factory = factory)
+    val dashboardViewModel: DashboardViewModel = hiltViewModel()
+    val applyViewModel: ApplyViewModel = hiltViewModel()
+    val profileViewModel: ProfileViewModel = hiltViewModel()
+    val applicationsViewModel: ApplicationsViewModel = hiltViewModel()
+    val notificationsViewModel: NotificationsViewModel = hiltViewModel()
+    val simulatorViewModel: SimulatorViewModel = hiltViewModel()
+    val authViewModel: AuthViewModel = hiltViewModel()
 
     fun refreshAll() {
         dashboardViewModel.refresh()
@@ -118,7 +116,7 @@ fun MainScaffold(modifier: Modifier = Modifier) {
             }
             refreshAll()
 
-            scope.launch { container.authRepository.syncDeviceToken() }
+            scope.launch { app.authRepository().syncDeviceToken() }
         } else {
             if (AppRoute.requiresAuth(currentRoute)) {
                 goTo(AppRoute.Login)
@@ -130,7 +128,7 @@ fun MainScaffold(modifier: Modifier = Modifier) {
 
     LaunchedEffect(signedIn) {
         if (!signedIn) return@LaunchedEffect
-        container.appEvents.refreshRequests.collect { refreshFromServerEvent() }
+        app.appEvents().refreshRequests.collect { refreshFromServerEvent() }
     }
 
     var firstResumeSeen by remember { mutableStateOf(false) }

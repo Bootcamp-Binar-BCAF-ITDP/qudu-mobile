@@ -13,8 +13,11 @@ import com.example.test2.data.repository.LoanRepository
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class DashboardViewModel(
+@HiltViewModel
+class DashboardViewModel @Inject constructor(
     private val repository: LoanRepository,
     private val sessionStore: SessionStore,
 ) : ViewModel() {

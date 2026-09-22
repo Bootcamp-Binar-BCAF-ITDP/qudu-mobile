@@ -10,8 +10,11 @@ import com.example.test2.data.dto.PlafondRequestDto
 import com.example.test2.data.repository.LoanRepository
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class PlafondViewModel(private val repository: LoanRepository) : ViewModel() {
+@HiltViewModel
+class PlafondViewModel @Inject constructor(private val repository: LoanRepository) : ViewModel() {
 
     var isBusy by mutableStateOf(false)
         private set

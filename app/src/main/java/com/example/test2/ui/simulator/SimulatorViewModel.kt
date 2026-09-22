@@ -13,8 +13,11 @@ import com.example.test2.core.monthlyInstalmentFor
 import com.example.test2.core.tierFor
 import com.example.test2.data.repository.PlafondCatalogRepository
 import kotlinx.coroutines.launch
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class SimulatorViewModel(
+@HiltViewModel
+class SimulatorViewModel @Inject constructor(
     private val repository: PlafondCatalogRepository,
 ) : ViewModel() {
 

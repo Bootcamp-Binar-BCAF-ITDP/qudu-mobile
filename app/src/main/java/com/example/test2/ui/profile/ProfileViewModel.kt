@@ -12,8 +12,11 @@ import com.example.test2.data.dto.CustomerProfileDto
 import com.example.test2.data.repository.AuthRepository
 import com.example.test2.data.repository.ProfileRepository
 import kotlinx.coroutines.launch
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class ProfileViewModel(
+@HiltViewModel
+class ProfileViewModel @Inject constructor(
     private val repository: ProfileRepository,
     private val authRepository: AuthRepository,
 ) : ViewModel() {
