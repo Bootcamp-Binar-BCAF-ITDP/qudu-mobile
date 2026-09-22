@@ -21,7 +21,10 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "BASE_URL", "\"https://api.profilku.site/\"")
+//        buildConfigField("String", "BASE_URL", "\"https://api.profilku.site/\"")
+       buildConfigField("String", "BASE_URL", "\"https://api-gcp.profilku.site/\"")
+//        buildConfigField("String", "BASE_URL", "\"http://10.10.100.219:8080/\"")
+        // buildConfigField("String", "BASE_URL", "\"http://10.10.13.110:8080/\"")
     }
 
     buildTypes {
@@ -42,6 +45,7 @@ android {
 }
 
 dependencies {
+    implementation("androidx.fragment:fragment-ktx:1.6.2")
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
@@ -67,6 +71,8 @@ dependencies {
     implementation(libs.firebase.messaging)
 
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.okhttp.mockwebserver)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)

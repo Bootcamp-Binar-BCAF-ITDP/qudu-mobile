@@ -65,7 +65,6 @@ fun LoansScreen(
     ) {
         Spacer(Modifier.height(20.dp))
 
-
         if (signedIn) {
             LimitCard(
                 available = (viewModel.plafond?.availableLimit

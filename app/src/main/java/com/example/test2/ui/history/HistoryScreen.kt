@@ -89,7 +89,6 @@ fun HistoryScreen(
     ) {
         Spacer(Modifier.height(20.dp))
 
-
         FilterTabs(selected = filter, onSelect = { filter = it })
 
         CachedDataNotice(
