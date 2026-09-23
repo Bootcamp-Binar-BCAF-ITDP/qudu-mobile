@@ -87,8 +87,6 @@ fun RegisterScreen(
         )
 
         SectionCard {
-            // First field on purpose: the branch decides who handles every loan
-            // this customer ever files, so it is a choice, not a detail.
             FieldLabel("Nearest branch")
             AppDropdownField(
                 options = viewModel.branches,

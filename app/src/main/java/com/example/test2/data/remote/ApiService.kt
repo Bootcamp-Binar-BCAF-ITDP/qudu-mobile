@@ -29,8 +29,6 @@ import retrofit2.http.*
 
 interface ApiService {
 
-    // Public, like the plafond catalog: the sign-up form has to list branches
-    // before the customer has an account to authenticate with.
     @GET("api/branches/options")
     suspend fun branchOptions(): Response<ApiEnvelope<List<BranchDto>>>
 

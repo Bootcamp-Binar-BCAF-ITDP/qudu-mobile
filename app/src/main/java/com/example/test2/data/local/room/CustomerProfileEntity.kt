@@ -11,11 +11,6 @@ import com.example.test2.data.dto.CustomerDocumentDto
 import com.example.test2.data.dto.CustomerProfileDto
 import kotlinx.coroutines.flow.Flow
 
-/**
- * The credit limit is deliberately absent: `approvedLimit`, `usedLimit`,
- * `availableLimit` and `plafond` have no columns here, so a stale limit cannot
- * be read back and used as the apply slider's ceiling.
- */
 @Entity(tableName = "customer_profile")
 data class CustomerProfileEntity(
 

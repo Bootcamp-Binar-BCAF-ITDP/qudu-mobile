@@ -71,10 +71,6 @@ import com.example.test2.ui.theme.StatusDangerBg
 import kotlin.math.pow
 import kotlin.math.roundToLong
 
-// The names below are what ~20 screens already import. They are now aliases
-// onto the brand palette in ui/theme/Color.kt, which mirrors colors.xml, so a
-// base colour is changed in one place. `Green` and `GreenBright` keep their
-// names only to avoid touching every call site; they are brand browns.
 internal val Green = Brand800
 internal val GreenBright = Brand500
 internal val ScreenBg = BrandScreenBg

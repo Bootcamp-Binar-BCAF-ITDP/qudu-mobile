@@ -6,14 +6,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.colorResource
 import com.example.test2.R
 
-/**
- * One light brand theme, read from `res/values/colors.xml`.
- *
- * Dynamic colour is gone on purpose: it repaints the scheme from the user's
- * wallpaper, which is exactly what a brand palette must not allow. The dark
- * scheme is gone too — every screen paints the light palette by hand, so a
- * dark scheme only ever showed through as black gaps.
- */
 @Composable
 fun Test2Theme(
     content: @Composable () -> Unit,

@@ -243,12 +243,6 @@ class NotificationRepositoryTest {
     }
 }
 
-/**
- * The branch list feeds the sign-up form, before the customer has a token. It
- * is checked at the API level because that is where it can break: a wrong path
- * or a renamed field would leave the picker silently empty and block every new
- * registration.
- */
 class BranchOptionsApiTest {
 
     private lateinit var server: MockWebServer
