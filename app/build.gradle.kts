@@ -2,6 +2,12 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.services)
+    alias(libs.plugins.hilt.android)
+    alias(libs.plugins.ksp)
+}
+
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
 }
 
 android {
@@ -22,9 +28,9 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
 //        buildConfigField("String", "BASE_URL", "\"https://api.profilku.site/\"")
-       buildConfigField("String", "BASE_URL", "\"https://api-gcp.profilku.site/\"")
+//       buildConfigField("String", "BASE_URL", "\"https://api-gcp.profilku.site/\"")
 //        buildConfigField("String", "BASE_URL", "\"http://10.10.100.219:8080/\"")
-        // buildConfigField("String", "BASE_URL", "\"http://10.10.13.110:8080/\"")
+         buildConfigField("String", "BASE_URL", "\"http://10.10.13.71:8080/\"")
     }
 
     buildTypes {
@@ -69,6 +75,15 @@ dependencies {
 
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging)
+
+    implementation(libs.hilt.android)
+    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
+    ksp(libs.hilt.android.compiler)
+
+    // Room DB
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

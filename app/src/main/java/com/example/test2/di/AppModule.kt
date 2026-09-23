@@ -3,9 +3,11 @@ package com.example.test2.di
 import android.content.ContentResolver
 import android.content.Context
 import com.example.test2.core.AppEvents
-import com.example.test2.data.local.LoanCache
-import com.example.test2.data.local.ProfileCache
 import com.example.test2.data.local.SessionStore
+import com.example.test2.data.local.room.CustomerProfileDao
+import com.example.test2.data.local.room.LoanApplicationDao
+import com.example.test2.data.local.room.PlafondRequestDao
+import com.example.test2.data.local.room.PlafondTierDao
 import com.example.test2.data.remote.ApiClient
 import com.example.test2.data.remote.ApiService
 import com.example.test2.data.repository.AuthRepository
@@ -46,37 +48,32 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideLoanCache(@ApplicationContext context: Context): LoanCache = LoanCache(context)
-
-    @Provides
-    @Singleton
-    fun provideProfileCache(@ApplicationContext context: Context): ProfileCache =
-        ProfileCache(context)
-
-    @Provides
-    @Singleton
     fun provideAuthRepository(
         api: ApiService,
         sessionStore: SessionStore,
-        loanCache: LoanCache,
-        profileCache: ProfileCache,
-    ): AuthRepository = AuthRepository(api, sessionStore, loanCache, profileCache)
+        applicationDao: LoanApplicationDao,
+        plafondRequestDao: PlafondRequestDao,
+        profileDao: CustomerProfileDao,
+    ): AuthRepository =
+        AuthRepository(api, sessionStore, applicationDao, plafondRequestDao, profileDao)
 
     @Provides
     @Singleton
     fun provideLoanRepository(
         api: ApiService,
         contentResolver: ContentResolver,
-        loanCache: LoanCache,
-    ): LoanRepository = LoanRepository(api, contentResolver, loanCache)
+        applicationDao: LoanApplicationDao,
+        plafondRequestDao: PlafondRequestDao,
+    ): LoanRepository =
+        LoanRepository(api, contentResolver, applicationDao, plafondRequestDao)
 
     @Provides
     @Singleton
     fun provideProfileRepository(
         api: ApiService,
         contentResolver: ContentResolver,
-        profileCache: ProfileCache,
-    ): ProfileRepository = ProfileRepository(api, contentResolver, profileCache)
+        profileDao: CustomerProfileDao,
+    ): ProfileRepository = ProfileRepository(api, contentResolver, profileDao)
 
     @Provides
     @Singleton
@@ -85,6 +82,8 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun providePlafondCatalogRepository(api: ApiService): PlafondCatalogRepository =
-        PlafondCatalogRepository(api)
+    fun providePlafondCatalogRepository(
+        api: ApiService,
+        tierDao: PlafondTierDao,
+    ): PlafondCatalogRepository = PlafondCatalogRepository(api, tierDao)
 }

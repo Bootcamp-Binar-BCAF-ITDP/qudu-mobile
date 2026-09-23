@@ -3,10 +3,16 @@ package com.example.test2.data.repository
 import com.example.test2.core.LoanTier
 import com.example.test2.core.Outcome
 import com.example.test2.core.PlafondTiers
+import com.example.test2.data.local.room.PlafondTierDao
+import com.example.test2.data.local.room.toEntity
+import com.example.test2.data.local.room.toTier
 import com.example.test2.data.remote.ApiService
 import com.example.test2.data.dto.PlafondDto
 
-class PlafondCatalogRepository(private val api: ApiService) {
+class PlafondCatalogRepository(
+    private val api: ApiService,
+    private val tierDao: PlafondTierDao,
+) {
 
     data class Catalog(val tiers: List<LoanTier>, val live: Boolean)
 
@@ -21,10 +27,18 @@ class PlafondCatalogRepository(private val api: ApiService) {
             .mapNotNull { it.toTier() }
             .sortedBy { it.level }
 
-        return if (tiers.isEmpty()) {
-            Catalog(PlafondTiers.FALLBACK, live = false)
+        if (tiers.isNotEmpty()) {
+            val now = System.currentTimeMillis()
+            tierDao.replaceAll(tiers.map { it.toEntity(now) })
+            return Catalog(tiers, live = true)
+        }
+
+        val cached = tierDao.loadAll().map { it.toTier() }
+
+        return if (cached.isNotEmpty()) {
+            Catalog(cached, live = false)
         } else {
-            Catalog(tiers, live = true)
+            Catalog(PlafondTiers.FALLBACK, live = false)
         }
     }
 }

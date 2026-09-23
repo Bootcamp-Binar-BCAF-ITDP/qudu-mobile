@@ -10,19 +10,37 @@ import com.example.test2.data.dto.LoanDocumentDto
 import com.example.test2.data.dto.PlafondRequestDto
 import com.example.test2.data.dto.PlafondUpgradeRequestDto
 import com.example.test2.data.local.CachedList
-import com.example.test2.data.local.LoanCache
+import com.example.test2.data.local.room.LoanApplicationDao
+import com.example.test2.data.local.room.PlafondRequestDao
+import com.example.test2.data.local.room.toDto
+import com.example.test2.data.local.room.toEntity
 import com.example.test2.data.remote.ApiService
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import java.math.BigDecimal
 
 class LoanRepository(
     private val api: ApiService,
     private val contentResolver: ContentResolver,
-    private val cache: LoanCache,
+    private val applicationDao: LoanApplicationDao,
+    private val plafondRequestDao: PlafondRequestDao,
 ) {
 
-    val cachedApplications: Flow<CachedList<LoanApplicationDto>> = cache.applications
-    val cachedUpgradeRequests: Flow<CachedList<PlafondRequestDto>> = cache.upgradeRequests
+    val cachedApplications: Flow<CachedList<LoanApplicationDto>> =
+        applicationDao.observeAll().map { rows ->
+            CachedList(
+                items = rows.map { it.toDto() },
+                fetchedAt = rows.minOfOrNull { it.fetchedAt },
+            )
+        }
+
+    val cachedUpgradeRequests: Flow<CachedList<PlafondRequestDto>> =
+        plafondRequestDao.observeAll().map { rows ->
+            CachedList(
+                items = rows.map { it.toDto() },
+                fetchedAt = rows.minOfOrNull { it.fetchedAt },
+            )
+        }
 
     suspend fun createApplication(
         body: LoanApplicationCreateRequestDto,
@@ -33,7 +51,8 @@ class LoanRepository(
             is Outcome.Failure -> result
             is Outcome.Success -> {
                 val items = result.value.data?.content.orEmpty()
-                cache.replaceApplications(items)
+                val now = System.currentTimeMillis()
+                applicationDao.replaceAll(items.mapNotNull { it.toEntity(now) })
                 Outcome.Success(items)
             }
         }
@@ -63,7 +82,8 @@ class LoanRepository(
             is Outcome.Failure -> result
             is Outcome.Success -> {
                 val items = result.value.data.orEmpty()
-                cache.replaceUpgradeRequests(items)
+                val now = System.currentTimeMillis()
+                plafondRequestDao.replaceAll(items.mapNotNull { it.toEntity(now) })
                 Outcome.Success(items)
             }
         }

@@ -42,8 +42,8 @@ import com.example.test2.ui.apply.TextPrimary
 import com.example.test2.ui.apply.TextSecondary
 
 
-private val ChipNeutralBg = Color(0xFFDCE7F1)
-private val SuccessBg = Color(0xFFE7F6ED)
+private val ChipNeutralBg = com.example.test2.ui.theme.BrandHighlight
+private val SuccessBg = com.example.test2.ui.theme.StatusSuccessBg
 
 @Composable
 fun StatusChip(status: String?) {

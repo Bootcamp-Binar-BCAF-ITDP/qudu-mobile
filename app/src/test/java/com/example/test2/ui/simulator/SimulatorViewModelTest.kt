@@ -3,6 +3,7 @@ package com.example.test2.ui.simulator
 import com.example.test2.core.PlafondTiers
 import com.example.test2.core.monthlyInstalmentFor
 import com.example.test2.data.repository.PlafondCatalogRepository
+import com.example.test2.testing.FakeTierDao
 import com.example.test2.testing.apiService
 import com.example.test2.testing.respond
 import com.example.test2.testing.waitUntil
@@ -31,7 +32,7 @@ class SimulatorViewModelTest {
     fun setUp() {
         Dispatchers.setMain(UnconfinedTestDispatcher())
         server = MockWebServer().apply { start() }
-        vm = SimulatorViewModel(PlafondCatalogRepository(server.apiService()))
+        vm = SimulatorViewModel(PlafondCatalogRepository(server.apiService(), FakeTierDao()))
     }
 
     @After

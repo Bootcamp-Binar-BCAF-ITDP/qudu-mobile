@@ -14,8 +14,8 @@ import androidx.compose.ui.unit.sp
 import java.util.Calendar
 import java.util.Locale
 
-private val Amber = Color(0xFFB25E02)
-private val AmberBg = Color(0xFFFFF6E5)
+private val Amber = com.example.test2.ui.theme.StatusAmber
+private val AmberBg = com.example.test2.ui.theme.StatusAmberBg
 
 @Composable
 fun CachedDataNotice(

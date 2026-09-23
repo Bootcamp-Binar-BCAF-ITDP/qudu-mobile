@@ -2,8 +2,9 @@ package com.example.test2.data.repository
 
 import com.example.test2.core.Outcome
 import com.example.test2.data.local.Session
-import com.example.test2.data.local.LoanCache
-import com.example.test2.data.local.ProfileCache
+import com.example.test2.data.local.room.CustomerProfileDao
+import com.example.test2.data.local.room.LoanApplicationDao
+import com.example.test2.data.local.room.PlafondRequestDao
 import com.example.test2.data.local.SessionStore
 import com.example.test2.data.remote.ApiService
 import com.example.test2.data.dto.BranchDto
@@ -19,8 +20,9 @@ import com.example.test2.messaging.currentFcmToken
 class AuthRepository(
     private val api: ApiService,
     private val sessionStore: SessionStore,
-    private val loanCache: LoanCache,
-    private val profileCache: ProfileCache,
+    private val applicationDao: LoanApplicationDao,
+    private val plafondRequestDao: PlafondRequestDao,
+    private val profileDao: CustomerProfileDao,
 ) {
 
     val session = sessionStore.session
@@ -120,8 +122,9 @@ class AuthRepository(
 
         sessionStore.clear()
 
-        loanCache.clear()
-        profileCache.clear()
+        applicationDao.deleteAll()
+        plafondRequestDao.deleteAll()
+        profileDao.deleteAll()
     }
 
     suspend fun syncDeviceToken(): Outcome<Unit> =

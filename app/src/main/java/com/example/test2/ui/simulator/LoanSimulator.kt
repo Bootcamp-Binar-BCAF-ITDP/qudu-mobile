@@ -40,10 +40,10 @@ import com.example.test2.ui.apply.TrackTodo
 import com.example.test2.ui.apply.formatRupiah
 import kotlin.math.roundToInt
 
-private val Amber = Color(0xFFB25E02)
+private val Amber = com.example.test2.ui.theme.StatusAmber
 
 
-private val AmberBg = Color(0xFFFFF6E5)
+private val AmberBg = com.example.test2.ui.theme.StatusAmberBg
 
 @Composable
 fun SimulatorPanel(

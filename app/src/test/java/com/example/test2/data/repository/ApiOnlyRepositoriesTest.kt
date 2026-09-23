@@ -2,6 +2,7 @@ package com.example.test2.data.repository
 
 import com.example.test2.core.Outcome
 import com.example.test2.core.PlafondTiers
+import com.example.test2.testing.FakeTierDao
 import com.example.test2.testing.apiService
 import com.example.test2.testing.respond
 import kotlinx.coroutines.test.runTest
@@ -23,7 +24,7 @@ class PlafondCatalogRepositoryTest {
     @Before
     fun setUp() {
         server = MockWebServer().apply { start() }
-        repository = PlafondCatalogRepository(server.apiService())
+        repository = PlafondCatalogRepository(server.apiService(), FakeTierDao())
     }
 
     @After
@@ -104,6 +105,18 @@ class PlafondCatalogRepositoryTest {
 
         assertFalse(catalog.live)
         assertEquals(PlafondTiers.FALLBACK, catalog.tiers)
+    }
+
+    @Test
+    fun `a failed request reuses the last server ladder, marked not live`() = runTest {
+        server.respond(200, """{"data":[${tier(1)},${tier(2)}]}""")
+        repository.load()
+
+        server.respond(500, """{"message":"down"}""")
+        val catalog = repository.load()
+
+        assertFalse(catalog.live)
+        assertEquals(listOf(1, 2), catalog.tiers.map { it.level })
     }
 
     @Test

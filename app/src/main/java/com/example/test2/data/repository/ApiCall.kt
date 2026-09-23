@@ -10,7 +10,7 @@ import java.io.IOException
 
 internal suspend fun <T> apiCall(
     dispatcher: CoroutineDispatcher = Dispatchers.IO,
-    block: suspend () -> Response<T>,
+    block: suspend () -> Response<T>
 ): Outcome<T> = withContext(dispatcher) {
     try {
         val response = block()

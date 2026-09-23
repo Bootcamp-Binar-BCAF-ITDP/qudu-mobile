@@ -53,17 +53,17 @@ import com.example.test2.ui.common.StatusChip
 import com.example.test2.ui.common.UnreadBadge
 
 
-private val Green = Color(0xFF0B6B2E)
-private val ScreenBg = Color(0xFFF6F8FA)
+private val Green = com.example.test2.ui.theme.Brand800
+private val ScreenBg = com.example.test2.ui.theme.BrandScreenBg
 private val CardBg = Color.White
-private val CardBorder = Color(0xFFE6E8EB)
-private val TextPrimary = Color(0xFF101828)
-private val TextSecondary = Color(0xFF667085)
-private val TextMuted = Color(0xFFB4BBC4)
+private val CardBorder = com.example.test2.ui.theme.BrandCardBorder
+private val TextPrimary = com.example.test2.ui.theme.BrandTextPrimary
+private val TextSecondary = com.example.test2.ui.theme.BrandTextSecondary
+private val TextMuted = com.example.test2.ui.theme.BrandTextMuted
 private val TrackDone = Green
-private val TrackTodo = Color(0xFFE0E3E7)
-private val WarnBg = Color(0xFFFFF6E5)
-private val Warn = Color(0xFFB25E02)
+private val TrackTodo = com.example.test2.ui.theme.BrandTrackTodo
+private val WarnBg = com.example.test2.ui.theme.StatusAmberBg
+private val Warn = com.example.test2.ui.theme.StatusAmber
 
 private val CardShape = RoundedCornerShape(16.dp)
 
@@ -136,7 +136,7 @@ fun DashboardScreen(
             Text(
                 text = errorMessage,
                 fontSize = 14.sp,
-                color = Color(0xFFE03131)
+                color = com.example.test2.ui.theme.StatusDanger
             )
         }
 

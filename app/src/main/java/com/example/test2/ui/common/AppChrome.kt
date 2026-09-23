@@ -40,8 +40,8 @@ import com.example.test2.ui.apply.TextSecondary
 import com.example.test2.ui.navigation.TopLevelDestination
 
 
-private val GreenPill = Color(0xFF7BE0A5)
-private val RedDot = Color(0xFFE5342A)
+private val GreenPill = com.example.test2.ui.theme.Brand200
+private val RedDot = com.example.test2.ui.theme.StatusDanger
 
 
 @Composable
@@ -60,9 +60,9 @@ fun QuDuTopBar(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Image(
-                painter = painterResource(R.drawable.logo_wordmark),
+                painter = painterResource(R.drawable.logo),
                 contentDescription = "QuickDuit",
-                modifier = Modifier.height(24.dp),
+                modifier = Modifier.height(36.dp),
             )
             Spacer(Modifier.weight(1f))
 
@@ -91,8 +91,8 @@ fun QuDuTopBar(
                     modifier = Modifier
                         .size(32.dp)
                         .clip(CircleShape)
-                        .background(Color(0xFFE7E9EC))
-                        .border(1.dp, Color(0xFFD3D7DC), CircleShape)
+                        .background(com.example.test2.ui.theme.BrandHighlight)
+                        .border(1.dp, com.example.test2.ui.theme.BrandFieldBorder, CircleShape)
                         .clickable(onClick = onProfile),
                     contentAlignment = Alignment.Center,
                 ) {

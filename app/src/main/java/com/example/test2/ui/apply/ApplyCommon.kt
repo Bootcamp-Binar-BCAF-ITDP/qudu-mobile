@@ -54,24 +54,42 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.test2.R
+import com.example.test2.ui.theme.Brand500
+import com.example.test2.ui.theme.Brand800
+import com.example.test2.ui.theme.BrandCardBg
+import com.example.test2.ui.theme.BrandCardBorder
+import com.example.test2.ui.theme.BrandFieldBg
+import com.example.test2.ui.theme.BrandFieldBorder
+import com.example.test2.ui.theme.BrandHighlight
+import com.example.test2.ui.theme.BrandScreenBg
+import com.example.test2.ui.theme.BrandTextMuted
+import com.example.test2.ui.theme.BrandTextPrimary
+import com.example.test2.ui.theme.BrandTextSecondary
+import com.example.test2.ui.theme.BrandTrackTodo
+import com.example.test2.ui.theme.StatusDanger
+import com.example.test2.ui.theme.StatusDangerBg
 import kotlin.math.pow
 import kotlin.math.roundToLong
 
-internal val Green = Color(0xFF0B6B2E)
-internal val GreenBright = Color(0xFF1E9E4A)
-internal val ScreenBg = Color(0xFFF6F8FA)
-internal val CardBg = Color.White
-internal val CardBorder = Color(0xFFE6E8EB)
-internal val FieldBg = Color(0xFFF8F9FB)
-internal val FieldBorder = Color(0xFFE3E6EA)
-internal val TextPrimary = Color(0xFF101828)
-internal val TextSecondary = Color(0xFF667085)
-internal val TextMuted = Color(0xFF98A2B3)
-internal val TrackTodo = Color(0xFFDCE7F1)
-internal val StepTodoBg = Color(0xFFDCE7F1)
-internal val Danger = Color(0xFFE03131)
-internal val DangerBg = Color(0xFFFEF3F3)
-internal val Highlight = Color(0xFFEEF3F8)
+// The names below are what ~20 screens already import. They are now aliases
+// onto the brand palette in ui/theme/Color.kt, which mirrors colors.xml, so a
+// base colour is changed in one place. `Green` and `GreenBright` keep their
+// names only to avoid touching every call site; they are brand browns.
+internal val Green = Brand800
+internal val GreenBright = Brand500
+internal val ScreenBg = BrandScreenBg
+internal val CardBg = BrandCardBg
+internal val CardBorder = BrandCardBorder
+internal val FieldBg = BrandFieldBg
+internal val FieldBorder = BrandFieldBorder
+internal val TextPrimary = BrandTextPrimary
+internal val TextSecondary = BrandTextSecondary
+internal val TextMuted = BrandTextMuted
+internal val TrackTodo = BrandTrackTodo
+internal val StepTodoBg = BrandTrackTodo
+internal val Danger = StatusDanger
+internal val DangerBg = StatusDangerBg
+internal val Highlight = BrandHighlight
 
 internal val CardShape = RoundedCornerShape(16.dp)
 internal val FieldShape = RoundedCornerShape(10.dp)
@@ -112,9 +130,9 @@ internal fun ApplyTopBar(stepLabel: String? = null) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
-                painter = painterResource(R.drawable.logo_wordmark),
+                painter = painterResource(R.drawable.logo),
                 contentDescription = "QuickDuit",
-                modifier = Modifier.height(24.dp)
+                modifier = Modifier.height(34.dp)
             )
             Spacer(Modifier.weight(1f))
             if (stepLabel != null) {

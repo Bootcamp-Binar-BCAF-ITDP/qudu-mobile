@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    The background is the flat brand green sampled from logo-mark.png itself,
-    and the foreground is that same artwork at 86% of the 108dp canvas. Matching
-    the two means the rounded corners already baked into the PNG blend into the
-    layer behind them instead of showing as a tile inside a tile, while the bar
-    chart stays clear of the launcher's mask.
+    Regenerated 2026-09-23 from Test3/Logo 2.png. The foreground is the mark
+    alone - the Q and its swoosh, cut at x=790 where the wordmark starts - at
+    64% of the 108dp canvas, which keeps it inside the 66dp safe zone whatever
+    mask the launcher applies. The wordmark is left out on purpose: it is
+    unreadable at 48px.
+
+    The background is brand sand, not the brown: the mark is brown, and brown
+    on brown reads as a muddy blob at icon size.
 
     No <monochrome>: the themed-icon layer wants a flat silhouette, and pointing
     it at full-colour artwork just gets it tinted into a blob. Without one,

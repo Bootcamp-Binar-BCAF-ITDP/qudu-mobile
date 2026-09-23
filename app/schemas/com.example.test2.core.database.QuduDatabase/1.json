@@ -1,0 +1,401 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 2,
+    "identityHash": "388d5d8818b240c57aa5c7c0954792e3",
+    "entities": [
+      {
+        "tableName": "loan_applications",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`applicationId` TEXT NOT NULL, `customerId` TEXT, `requestedAmount` TEXT, `tenor` INTEGER, `purpose` TEXT, `income` TEXT, `status` TEXT, `submissionDate` TEXT, `bank` TEXT, `bankAccountNumber` TEXT, `bankAccountName` TEXT, `customer` TEXT, `documents` TEXT, `review` TEXT, `bmdecision` TEXT, `verifications` TEXT, `disbursement` TEXT, `fetchedAt` INTEGER NOT NULL, PRIMARY KEY(`applicationId`))",
+        "fields": [
+          {
+            "fieldPath": "applicationId",
+            "columnName": "applicationId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "customerId",
+            "columnName": "customerId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "requestedAmount",
+            "columnName": "requestedAmount",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "tenor",
+            "columnName": "tenor",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "purpose",
+            "columnName": "purpose",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "income",
+            "columnName": "income",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "submissionDate",
+            "columnName": "submissionDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "bank",
+            "columnName": "bank",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "bankAccountNumber",
+            "columnName": "bankAccountNumber",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "bankAccountName",
+            "columnName": "bankAccountName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "customer",
+            "columnName": "customer",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "documents",
+            "columnName": "documents",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "review",
+            "columnName": "review",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "bmdecision",
+            "columnName": "bmdecision",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "verifications",
+            "columnName": "verifications",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "disbursement",
+            "columnName": "disbursement",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "fetchedAt",
+            "columnName": "fetchedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "applicationId"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_loan_applications_customerId",
+            "unique": false,
+            "columnNames": [
+              "customerId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_loan_applications_customerId` ON `${TABLE_NAME}` (`customerId`)"
+          }
+        ]
+      },
+      {
+        "tableName": "plafond_requests",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`requestId` TEXT NOT NULL, `customerId` TEXT, `customerName` TEXT, `previousLevel` INTEGER, `requestedLevel` INTEGER, `requestedAmount` TEXT, `approvedAmount` TEXT, `status` TEXT, `requestDate` TEXT, `decisionDate` TEXT, `reviewedBy` TEXT, `notes` TEXT, `requestedPlafond` TEXT, `fetchedAt` INTEGER NOT NULL, PRIMARY KEY(`requestId`))",
+        "fields": [
+          {
+            "fieldPath": "requestId",
+            "columnName": "requestId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "customerId",
+            "columnName": "customerId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "customerName",
+            "columnName": "customerName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "previousLevel",
+            "columnName": "previousLevel",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "requestedLevel",
+            "columnName": "requestedLevel",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "requestedAmount",
+            "columnName": "requestedAmount",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "approvedAmount",
+            "columnName": "approvedAmount",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "requestDate",
+            "columnName": "requestDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "decisionDate",
+            "columnName": "decisionDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "reviewedBy",
+            "columnName": "reviewedBy",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "notes",
+            "columnName": "notes",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "requestedPlafond",
+            "columnName": "requestedPlafond",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "fetchedAt",
+            "columnName": "fetchedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "requestId"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_plafond_requests_customerId",
+            "unique": false,
+            "columnNames": [
+              "customerId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_plafond_requests_customerId` ON `${TABLE_NAME}` (`customerId`)"
+          }
+        ]
+      },
+      {
+        "tableName": "customer_profile",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`customerId` TEXT NOT NULL, `customerName` TEXT, `email` TEXT, `phoneNumber` TEXT, `nik` TEXT, `address` TEXT, `sex` TEXT, `birthPlace` TEXT, `birthDate` TEXT, `occupation` TEXT, `citizenship` TEXT, `documents` TEXT, `profileComplete` INTEGER NOT NULL, `missingDocuments` TEXT, `missingForSubmission` TEXT, `staleForSubmission` TEXT, `submissionFreshnessDays` INTEGER NOT NULL, `readyToSubmit` INTEGER NOT NULL, `fetchedAt` INTEGER NOT NULL, PRIMARY KEY(`customerId`))",
+        "fields": [
+          {
+            "fieldPath": "customerId",
+            "columnName": "customerId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "customerName",
+            "columnName": "customerName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "email",
+            "columnName": "email",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "phoneNumber",
+            "columnName": "phoneNumber",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "nik",
+            "columnName": "nik",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "address",
+            "columnName": "address",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "sex",
+            "columnName": "sex",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "birthPlace",
+            "columnName": "birthPlace",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "birthDate",
+            "columnName": "birthDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "occupation",
+            "columnName": "occupation",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "citizenship",
+            "columnName": "citizenship",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "documents",
+            "columnName": "documents",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "profileComplete",
+            "columnName": "profileComplete",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "missingDocuments",
+            "columnName": "missingDocuments",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "missingForSubmission",
+            "columnName": "missingForSubmission",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "staleForSubmission",
+            "columnName": "staleForSubmission",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "submissionFreshnessDays",
+            "columnName": "submissionFreshnessDays",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "readyToSubmit",
+            "columnName": "readyToSubmit",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fetchedAt",
+            "columnName": "fetchedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "customerId"
+          ]
+        }
+      },
+      {
+        "tableName": "plafond_tiers",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`level` INTEGER NOT NULL, `name` TEXT NOT NULL, `minAmount` INTEGER NOT NULL, `maxAmount` INTEGER NOT NULL, `minTenor` INTEGER NOT NULL, `maxTenor` INTEGER NOT NULL, `annualRate` REAL NOT NULL, `adminFee` INTEGER NOT NULL, `fetchedAt` INTEGER NOT NULL, PRIMARY KEY(`level`))",
+        "fields": [
+          {
+            "fieldPath": "level",
+            "columnName": "level",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "minAmount",
+            "columnName": "minAmount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "maxAmount",
+            "columnName": "maxAmount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "minTenor",
+            "columnName": "minTenor",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "maxTenor",
+            "columnName": "maxTenor",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "annualRate",
+            "columnName": "annualRate",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "adminFee",
+            "columnName": "adminFee",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fetchedAt",
+            "columnName": "fetchedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "level"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '388d5d8818b240c57aa5c7c0954792e3')"
+    ]
+  }
+}

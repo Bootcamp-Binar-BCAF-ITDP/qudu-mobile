@@ -7,6 +7,9 @@
         <domain includeSubdomains="false">10.10.100.219</domain>
         <domain includeSubdomains="false">192.168.0.112</domain>
         <domain includeSubdomains="false">172.27.245.172</domain>
+        <domain includeSubdomains="false">10.10.14.184</domain>
         <domain includeSubdomains="false">api.profilku.site</domain>
+        <domain includeSubdomains="false">api-gcp.profilku.site</domain>
+        <domain includeSubdomains="false">10.10.13.71</domain>
     </domain-config>
 </network-security-config>

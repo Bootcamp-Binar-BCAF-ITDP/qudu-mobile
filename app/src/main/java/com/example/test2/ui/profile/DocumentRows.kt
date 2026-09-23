@@ -42,7 +42,7 @@ import com.example.test2.ui.apply.TextPrimary
 import com.example.test2.ui.apply.TextSecondary
 import androidx.compose.ui.graphics.Color
 
-private val Amber = Color(0xFFB25E02)
+private val Amber = com.example.test2.ui.theme.StatusAmber
 
 @Composable
 fun DocumentRow(

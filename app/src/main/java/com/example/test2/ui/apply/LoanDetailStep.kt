@@ -330,7 +330,7 @@ private fun SimulationSummary(state: ApplyLoanState) {
                 .offset(x = 40.dp, y = (-60).dp)
                 .size(200.dp)
                 .clip(CircleShape)
-                .background(Color(0xFFCFE6D6))
+                .background(com.example.test2.ui.theme.Brand200)
         )
 
         Column(Modifier.padding(20.dp)) {

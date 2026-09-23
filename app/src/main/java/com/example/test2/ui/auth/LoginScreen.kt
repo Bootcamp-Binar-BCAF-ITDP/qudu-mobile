@@ -46,9 +46,9 @@ fun LoginScreen(
         Spacer(Modifier.height(24.dp))
 
         Image(
-            painter = painterResource(R.drawable.logo_lockup),
+            painter = painterResource(R.drawable.logo_stacked),
             contentDescription = "QuickDuit",
-            modifier = Modifier.height(96.dp),
+            modifier = Modifier.height(170.dp),
         )
 
         Text(
@@ -140,7 +140,7 @@ internal fun MessageArea(error: String?, info: String?) {
             .padding(top = 16.dp)
             .fillMaxWidth()
             .background(
-                if (isError) DangerBg else Color(0xFFEAF7EF),
+                if (isError) DangerBg else com.example.test2.ui.theme.Brand50,
                 FieldShape,
             )
             .padding(12.dp),
