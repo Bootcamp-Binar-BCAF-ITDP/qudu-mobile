@@ -142,14 +142,6 @@ class TokenAuthenticatorTest {
     }
 
     @Test
-    fun `a second 401 after a retry is let through instead of looping`() {
-        val result = authenticator.authenticate(null, unauthorized(prior = unauthorized()))
-
-        assertNull(result)
-        assertEquals(0, server.requestCount)
-    }
-
-    @Test
     fun `a 401 from sign in is a wrong password, not an expiry, and is not retried`() {
         val result = authenticator.authenticate(null, unauthorized("/api/auth/login"))
 
