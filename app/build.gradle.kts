@@ -28,9 +28,9 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
 //        buildConfigField("String", "BASE_URL", "\"https://api.profilku.site/\"")
-//       buildConfigField("String", "BASE_URL", "\"https://api-gcp.profilku.site/\"")
+       buildConfigField("String", "BASE_URL", "\"https://api-gcp.profilku.site/\"")
 //        buildConfigField("String", "BASE_URL", "\"http://10.10.100.219:8080/\"")
-         buildConfigField("String", "BASE_URL", "\"http://10.10.13.71:8080/\"")
+//         buildConfigField("String", "BASE_URL", "\"http://10.10.13.71:8080/\"")
     }
 
     buildTypes {
